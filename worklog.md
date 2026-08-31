@@ -73,3 +73,25 @@ Stage Summary:
 - Les 3 griefs utilisateur corrigés : plus AUCUN effet curseur custom (proximité Sylva à la place), plus aucune card générique (listes éditoriales numérotées, galerie de planches, carte typographique), layout non template (Lexend 300, dock verre, frost pills bornées, filets hairline, numéros stroke)
 - Grammaire Sylva Living Green appliquée fidèlement : config typo exacte du bundle, pattern dock autho (pas de blur global), un seul frosted réel par vue
 - Fonctionnalités intactes : formulaire + DB, onglets menu, scroll horizontal épinglé, overlay mobile, SEO JSON-LD
+
+---
+Task ID: 4
+Agent: Super Z (main)
+Task: Retrait des animations Three.js (grains + tasse) et création d'une intro vidéo scrubée au scroll menant au hero (vidéo fournie par l'utilisateur)
+
+Work Log:
+- Vidéo fournie : upload/Café_concept_master_video_prompt_202608311010.mp4 (10 s, 1280x720, 24 fps, h264) — beats : assemblage des plats → splash caramel → la tasse se transforme en bol de bo bun → reveal du logo CAFÉ CONCEPT
+- Encodage pour scrub (scripts/encode_intro_video.sh) : all-intra (-g 1, chaque frame = keyframe → seeks instantanés) → /public/video/intro.mp4 (720p, 8,7 Mo) + intro-540.mp4 (mobile 540p, 4,3 Mo, via <source media>), + intro-poster.jpg (frame 0) + hero-still.jpg (dernière frame, logo révélé)
+- VideoIntro.tsx (nouveau) : piste 380 vh, frame sticky 100svh, ScrollTrigger mappe le progrès du scroll sur video.currentTime avec lissage rAF (lerp 0.22, seuil demi-frame 1/48 s) — scrub image-par-image vérifié exact (850 px → 3,36 s ; 1200 px → 4,74 s ; reverse OK)
+- Chapitres FR en grammaire Sylva (micro-caps + Lexend light, ancrés bas gauche) synchronisés par timeline scrubée : « Chaque matin, tout commence ici. » / « Un tourbillon de saveurs. » / « De la tasse au bol, tout est fait maison. » + chip de fin « — la maison vous attend — » sous le logo
+- UI : filet de progression 1 px remplissage caramel, indication « faites défiler — la vidéo suit » (drip), bouton « passer l'intro » (skipToHero → Lenis offset 0, atterrit pile sur le hero, testé heroTop:0)
+- Robustesse : déverrouillage lecture iOS (muted play/pause gardé currentTime<0.05), garde anti-réapparition du chapitre 1, fallback statique prefers-reduced-motion via useSyncExternalStore (lint clean), 2 sources vidéo responsive
+- Hero.tsx : suppression totale de CoffeeScene (tasse procédurale, grains en orbite, vapeur — dossier three/ supprimé) ; fond remplacé par hero-still.jpg (dernière frame de la vidéo = continuité parfaite avec la fin du scrub) + scrim cinéma (brightness 0.62 + voile espresso) pour la lisibilité du titre sur le logo
+- Déclenchement de l'intro du hero déplacé : plus au chargement (cc:intro) mais À L'ARRIVÉE au hero (ScrollTrigger once start "top 82%") — dézoom léger du still + titre lettre à lettre ; filet de sécurité 2,5 s si restauration de scroll
+- page.tsx : VideoIntro inséré avant Hero ; aucune référence three/ restante
+- Vérifié navigateur (desktop 1440x900 + mobile 390x844) : scrub aller/retour, chapitres, sources 540p/720p, skip, continuité visuelle intro→hero, lisibilité mobile du sous-titre, zéro erreur console, eslint + tsc propres
+
+Stage Summary:
+- Le hero n'a plus AUCUNE animation Three.js (grains et tasse retirés) : la 3D laisse place à la vraie vidéo de marque
+- Nouveau parcours : preloader → intro vidéo scrubée au scroll (380 vh, 3 chapitres + reveal logo) → arrivée choreographiée au hero sur le still final
+- Assets : /public/video/{intro.mp4, intro-540.mp4, intro-poster.jpg, hero-still.jpg} ; encodage reproductible via scripts/encode_intro_video.sh

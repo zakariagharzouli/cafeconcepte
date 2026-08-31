@@ -1,5 +1,6 @@
 import Preloader from "@/components/site/Preloader";
 import Dock from "@/components/site/Dock";
+import VideoIntro from "@/components/site/VideoIntro";
 import Hero from "@/components/site/Hero";
 import Marquee from "@/components/site/Marquee";
 import Engagements from "@/components/site/Engagements";
@@ -17,6 +18,7 @@ export default function Home() {
       <Dock />
 
       <main className="flex-1">
+        <VideoIntro />
         <Hero />
         <Marquee />
         <Engagements />

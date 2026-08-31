@@ -1,19 +1,11 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import dynamic from "next/dynamic";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ArrowDown, Phone } from "lucide-react";
 import { SITE } from "@/lib/site-data";
 import { scrollTo } from "./Dock";
-
-const CoffeeScene = dynamic(() => import("./three/CoffeeScene"), {
-  ssr: false,
-  loading: () => (
-    <div className="absolute inset-0 bg-grad-espresso" aria-hidden="true" />
-  ),
-});
 
 export default function Hero() {
   const rootRef = useRef<HTMLElement>(null);
@@ -24,7 +16,7 @@ export default function Hero() {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     const ctx = gsap.context(() => {
-      /* ── Intro déclenchée par le preloader ── */
+      /* ── Intro déclenchée À L'ARRIVÉE au hero (fin du scrub vidéo) ── */
       const q = gsap.utils.selector(root);
 
       const play = () => {
@@ -82,45 +74,63 @@ export default function Hero() {
         started = true;
         gsap.delayedCall(0.25, play);
       };
-      window.addEventListener("cc:intro", onStart);
 
       if (reduced) {
         gsap.set(root.querySelectorAll<HTMLElement>("[class*='hero-']"), {
           clearProps: "all",
           opacity: 1,
         });
+        return;
       }
 
-      const fallback = gsap.delayedCall(3.4, onStart);
+      /* Arrivée au hero : le still se pose (léger dézoom), puis
+         le titre monte lettre à lettre — la continuité avec la
+         dernière frame de la vidéo rend le passage invisible. */
+      ScrollTrigger.create({
+        trigger: root,
+        start: "top 82%",
+        once: true,
+        onEnter: () => {
+          gsap.fromTo(
+            q(".hero-visual img"),
+            { scale: 1.08 },
+            { scale: 1, duration: 2.8, ease: "power2.out" }
+          );
+          onStart();
+        },
+      });
+
+      /* Filet de sécurité : si le hero est déjà à l'écran au chargement
+         (restauration de scroll, ancre directe) l'intro part aussitôt. */
+      const fallback = gsap.delayedCall(2.5, () => {
+        const r = root.getBoundingClientRect();
+        if (r.top < window.innerHeight * 0.9) onStart();
+      });
 
       /* ── Parallaxe de sortie au scroll ── */
-      if (!reduced) {
-        gsap.to(q(".hero-content"), {
-          yPercent: -12,
-          opacity: 0.3,
-          ease: "none",
-          scrollTrigger: {
-            trigger: root,
-            start: "top top",
-            end: "bottom top",
-            scrub: true,
-          },
-        });
-        gsap.to(q(".hero-canvas-wrap"), {
-          yPercent: 10,
-          scale: 1.05,
-          ease: "none",
-          scrollTrigger: {
-            trigger: root,
-            start: "top top",
-            end: "bottom top",
-            scrub: true,
-          },
-        });
-      }
+      gsap.to(q(".hero-content"), {
+        yPercent: -12,
+        opacity: 0.3,
+        ease: "none",
+        scrollTrigger: {
+          trigger: root,
+          start: "top top",
+          end: "bottom top",
+          scrub: true,
+        },
+      });
+      gsap.to(q(".hero-visual"), {
+        yPercent: 9,
+        ease: "none",
+        scrollTrigger: {
+          trigger: root,
+          start: "top top",
+          end: "bottom top",
+          scrub: true,
+        },
+      });
 
       return () => {
-        window.removeEventListener("cc:intro", onStart);
         fallback.kill();
       };
     }, root);
@@ -137,9 +147,17 @@ export default function Hero() {
       id="hero"
       className="relative flex min-h-[100svh] items-end overflow-hidden"
     >
-      {/* Scène WebGL — le monde vivant */}
-      <div className="hero-canvas-wrap absolute inset-0 will-change-transform">
-        <CoffeeScene />
+      {/* Still final de la vidéo d'intro — continuité parfaite avec le scrub.
+          Légère baisse de luminosité : scrim cinéma pour la lisibilité
+          du titre sur les lettres crème du logo. */}
+      <div className="hero-visual absolute inset-0 will-change-transform">
+        <img
+          src="/video/hero-still.jpg"
+          alt=""
+          aria-hidden="true"
+          className="h-full w-full object-cover brightness-[0.62] will-change-transform"
+        />
+        <div className="absolute inset-0 bg-espresso-deep/25" aria-hidden="true" />
       </div>
 
       {/* Voiles de lisibilité — légers, orientés bas (pas de slabs lourds) */}
