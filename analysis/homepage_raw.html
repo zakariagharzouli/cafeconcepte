@@ -1,0 +1,711 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accueil - Café Concept</title>
+    <meta name="description" content="Café Concept - Restaurant et traiteur à Moissy-Cramayel. Cuisine savoureuse et authentique.">
+    <link rel="icon" type="image/png" href="images/Logo.png">
+    
+    <!-- CSS unique optimisé - Tout est dans app.css -->
+    <link rel="stylesheet" href="css/app.css">
+    
+    <!-- Google Fonts pour polices script (chargement asynchrone) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;500;600;700&family=Great+Vibes&family=Parisienne&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Caveat:wght@400;500;600;700&family=Kalam:wght@300;400;700&display=swap" rel="stylesheet">
+    
+    <!-- Police Breathing -->
+    <style>
+        @font-face {
+            font-family: 'Breathing';
+            src: url('fonts/Breathing.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+    </style>
+    
+    <!-- Icons (lightweight) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.min.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="nav" id="nav">
+        <div class="container">
+            <div class="nav-inner">
+                <a href="index.php" class="nav-brand">
+                    <img src="images/Logo.png" alt="Café Concept">
+                    <span class="d-none d-md-inline">
+                        <span class="cafe-part">café</span>
+                        <span class="concept-part">CONCEPT</span>
+                    </span>
+                </a>
+                
+                <button class="nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')" aria-label="Menu">
+                    <i class="bi bi-list"></i>
+                </button>
+                
+                <ul class="nav-links">
+                    <li><a href="index.php" class="nav-link active">Accueil</a></li>
+                    <li><a href="menu-food.php" class="nav-link ">Menu</a></li>
+                    <li><a href="traiteur.php" class="nav-link ">Traiteur</a></li>
+                    <li><a href="contact.php" class="nav-link ">Contact</a></li>
+                    <li>
+                                                    <span class="nav-link nav-cart disabled" title="Commandes temporairement désactivées - Contactez-nous par téléphone">
+                                <i class="bi bi-bag-x"></i>
+                                <span class="nav-cart-badge">
+                                    <i class="bi bi-exclamation-triangle-fill"></i>
+                                </span>
+                            </span>
+                                            </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+        <!-- Bannière d'alerte commandes désactivées -->
+    <div class="alert-commandes-desactivees">
+        <div class="container">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <strong>Commandes en ligne temporairement désactivées</strong>
+            <span>- Contactez-nous par téléphone :</span>
+            <a href="tel:06 66 02 86 03">
+                <i class="bi bi-telephone-fill me-1"></i>06 66 02 86 03            </a>
+        </div>
+    </div>
+        
+    <main>
+
+<!-- ============================================
+     HERO AVEC IMAGE DU RESTAURANT - DESIGN MODERNE
+     ============================================ -->
+<section class="hero-image hero-modern" style="background-image: url('images/cafeconcept.jpg');">
+    <div class="hero-overlay"></div>
+    <div class="container">
+        <div class="hero-content hero-content-modern fade-in">
+            <div class="hero-logo-wrapper">
+                <img src="images/Logo.png" alt="Café Concept" width="140" height="auto" loading="eager" class="hero-logo">
+            </div>
+            
+            <h1 class="hero-title-modern">
+                <span class="cafe-part">café</span>
+                <span class="concept-part concept-gold">CONCEPT</span>
+            </h1>
+            
+            <p class="hero-subtitle-modern">
+                Restaurant & Traiteur à Moissy-Cramayel<br>
+                <span class="hero-accent">Cuisine savoureuse, saveurs asiatiques, burgers gourmands et spécialités maison</span>
+            </p>
+            
+            <div class="hero-actions hero-actions-modern">
+                <a href="menu-food.php" class="btn btn-primary btn-lg btn-gold">
+                    <i class="bi bi-menu-up"></i>
+                    <span>Découvrir le Menu</span>
+                </a>
+                <a href="tel:0666028603" class="btn btn-lg btn-outline-gold">
+                    <i class="bi bi-telephone"></i>
+                    <span>Nous Appeler</span>
+                </a>
+            </div>
+            
+            <div class="hero-stats hero-stats-modern">
+                <div class="hero-stat-modern">
+                    <div class="hero-stat-icon">
+                        <i class="bi bi-star-fill"></i>
+                    </div>
+                    <div class="hero-stat-content">
+                        <div class="hero-stat-value">4.9</div>
+                    <div class="hero-stat-label">Note Google</div>
+                    </div>
+                </div>
+                <div class="hero-stat-modern">
+                    <div class="hero-stat-icon">
+                        <i class="bi bi-people-fill"></i>
+                    </div>
+                    <div class="hero-stat-content">
+                    <div class="hero-stat-value">240+</div>
+                    <div class="hero-stat-label">Avis clients</div>
+                    </div>
+                </div>
+                <div class="hero-stat-modern">
+                    <div class="hero-stat-icon">
+                        <i class="bi bi-egg-fried"></i>
+                    </div>
+                    <div class="hero-stat-content">
+                    <div class="hero-stat-value">75+</div>
+                    <div class="hero-stat-label">Spécialités</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="scroll-indicator scroll-indicator-modern">
+        <i class="bi bi-chevron-down"></i>
+    </div>
+</section>
+
+<!-- ============================================
+     NOTRE CARTE - DESIGN MODERNE
+     ============================================ -->
+<section class="section section-categories">
+    <div class="container">
+        <div class="section-header section-header-modern">
+            <span class="section-badge section-badge-gold">
+                <i class="bi bi-menu-up"></i>
+                Notre Menu
+            </span>
+            <h2 class="section-title-modern">Notre Carte</h2>
+            <p class="section-subtitle-modern">Découvrez tous nos plats et spécialités</p>
+        </div>
+        
+        <div class="text-center">
+            <a href="carte.php" class="btn btn-gold btn-lg fade-in" style="padding: 1.5rem 3rem; font-size: 1.2rem;">
+                <i class="bi bi-menu-up me-2"></i>
+                <span>Voir la Carte Complète</span>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================
+     POURQUOI NOUS CHOISIR - DESIGN MODERNE
+     ============================================ -->
+<section class="section section-alt section-why-us">
+    <div class="container">
+        <div class="section-header section-header-modern">
+            <span class="section-badge section-badge-gold">
+                <i class="bi bi-star-fill"></i>
+                Nos Engagements
+            </span>
+            <h2 class="section-title-modern">
+                Pourquoi <span class="cafe-part">café</span> <span class="concept-part concept-gold">CONCEPT</span> ?
+            </h2>
+            <p class="section-subtitle-modern">Une expérience culinaire unique qui fait la différence</p>
+        </div>
+        
+        <div class="card-grid card-grid-modern">
+            <div class="card card-modern-feature text-center fade-in">
+                <div class="feature-icon-wrapper">
+                    <i class="bi bi-heart-fill"></i>
+                </div>
+                <h3>Fait Maison</h3>
+                <p>Tous nos plats sont préparés sur place avec des produits frais sélectionnés avec soin.</p>
+            </div>
+            
+            <div class="card card-modern-feature text-center fade-in">
+                <div class="feature-icon-wrapper">
+                    <i class="bi bi-lightning-fill"></i>
+                </div>
+                <h3>Service Rapide</h3>
+                <p>Commandez sur place ou à emporter.</p>
+            </div>
+            
+            <div class="card card-modern-feature text-center fade-in">
+                <div class="feature-icon-wrapper">
+                    <i class="bi bi-award-fill"></i>
+                </div>
+                <h3>Qualité Premium</h3>
+                <p>Des ingrédients de qualité pour des plats savoureux. Satisfaction garantie !</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================
+     NOS SPÉCIALITÉS - DESIGN MODERNE
+     ============================================ -->
+<section class="section section-specialties">
+    <div class="container">
+        <div class="section-header section-header-modern">
+            <span class="section-badge section-badge-gold">
+                <i class="bi bi-egg-fried"></i>
+                Nos Créations
+            </span>
+            <h2 class="section-title-modern">Nos Spécialités</h2>
+            <p class="section-subtitle-modern">Découvrez nos plats préparés avec passion</p>
+        </div>
+        
+        <div class="card-grid card-grid-modern">
+            <div class="card card-modern-feature text-center fade-in">
+                <div class="feature-icon-wrapper">
+                    <i class="bi bi-cup-hot"></i>
+                </div>
+                <h3>Cuisine Asiatique</h3>
+                <p>Nos plats asiatiques authentiques préparés avec des ingrédients frais et savoureux.</p>
+            </div>
+            
+            <div class="card card-modern-feature text-center fade-in">
+                <div class="feature-icon-wrapper">
+                    <i class="bi bi-circle-fill"></i>
+                </div>
+                <h3>Burgers Gourmands</h3>
+                <p>Des burgers maison avec des ingrédients de qualité, préparés sur place.</p>
+            </div>
+            
+            <div class="card card-modern-feature text-center fade-in">
+                <div class="feature-icon-wrapper">
+                    <i class="bi bi-flower1"></i>
+                </div>
+                <h3>Salades Fraîches</h3>
+                <p>Des salades composées avec des légumes frais et des assaisonnements maison.</p>
+            </div>
+            
+            <div class="card card-modern-feature text-center fade-in">
+                <div class="feature-icon-wrapper">
+                    <i class="bi bi-box"></i>
+                </div>
+                <h3>Sandwichs Maison</h3>
+                <p>Nos sandwichs préparés avec du pain frais et des ingrédients de qualité.</p>
+            </div>
+            
+            <div class="card card-modern-feature text-center fade-in">
+                <div class="feature-icon-wrapper">
+                    <i class="bi bi-cup-straw"></i>
+                </div>
+                <h3>Boissons</h3>
+                <p>Cafés, thés, jus de fruits et boissons fraîches pour accompagner vos repas.</p>
+            </div>
+            
+            <div class="card card-modern-feature text-center fade-in">
+                <div class="feature-icon-wrapper">
+                    <i class="bi bi-star-fill"></i>
+                </div>
+                <h3>Spécialités Maison</h3>
+                <p>Nos plats du jour et spécialités préparés quotidiennement avec passion.</p>
+            </div>
+        </div>
+        
+        <div class="text-center mt-4">
+            <a href="menu-food.php" class="btn btn-outline-gold btn-lg">
+                <span>Découvrir tout le menu</span>
+                <i class="bi bi-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================
+     NOS SERVICES - DESIGN MODERNE
+     ============================================ -->
+<section class="section section-alt section-services">
+    <div class="container">
+        <div class="section-header section-header-modern">
+            <span class="section-badge section-badge-gold">
+                <i class="bi bi-gear-fill"></i>
+                Nos Services
+            </span>
+            <h2 class="section-title-modern">Nos Services</h2>
+            <p class="section-subtitle-modern">Plusieurs façons de profiter de notre cuisine</p>
+        </div>
+        
+        <div class="card-grid card-grid-services">
+            <div class="service-card service-card-modern fade-in">
+                <div class="service-icon service-icon-modern">
+                    <i class="bi bi-shop"></i>
+                </div>
+                <div class="service-content">
+                    <h3>Sur Place</h3>
+                    <p>Profitez de notre espace chaleureux pour déguster vos plats dans une ambiance conviviale.</p>
+                </div>
+            </div>
+            
+            <div class="service-card service-card-modern fade-in">
+                <div class="service-icon service-icon-modern">
+                    <i class="bi bi-bag"></i>
+                </div>
+                <div class="service-content">
+                    <h3>À Emporter</h3>
+                    <p>Commandez en avance et récupérez votre commande prête à l'heure souhaitée.</p>
+                </div>
+            </div>
+            
+            <div class="service-card service-card-modern fade-in">
+                <div class="service-icon service-icon-modern">
+                    <i class="bi bi-calendar-event"></i>
+                </div>
+                <div class="service-content">
+                    <h3>Traiteur</h3>
+                    <p>Pour vos événements : anniversaires, mariages, séminaires... Devis gratuit !</p>
+                    <a href="traiteur.php" class="service-link">
+                        En savoir plus <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================
+     TÉMOIGNAGES - DESIGN MODERNE
+     ============================================ -->
+<section class="section section-testimonials">
+    <div class="container">
+        <div class="section-header section-header-modern">
+            <span class="section-badge section-badge-gold">
+                <i class="bi bi-chat-quote-fill"></i>
+                Témoignages
+            </span>
+            <h2 class="section-title-modern">Ce que disent nos clients</h2>
+            <p class="section-subtitle-modern">Plus de 240 avis positifs sur Google</p>
+        </div>
+        
+        <div class="card-grid card-grid-testimonials">
+                        <div class="testimonial-card testimonial-card-modern fade-in">
+                <div class="testimonial-stars testimonial-stars-modern">
+                                        <i class="bi bi-star-fill"></i>
+                                        <i class="bi bi-star-fill"></i>
+                                        <i class="bi bi-star-fill"></i>
+                                        <i class="bi bi-star-fill"></i>
+                                        <i class="bi bi-star-fill"></i>
+                                    </div>
+                <p class="testimonial-text">"Très bon café-resto de quartier. Les portions sont généreuses et de qualité. Je recommande vivement !"</p>
+                <div class="testimonial-author testimonial-author-modern">
+                    <i class="bi bi-person-circle"></i>
+                    Jonathan K.                </div>
+            </div>
+                        <div class="testimonial-card testimonial-card-modern fade-in">
+                <div class="testimonial-stars testimonial-stars-modern">
+                                        <i class="bi bi-star-fill"></i>
+                                        <i class="bi bi-star-fill"></i>
+                                        <i class="bi bi-star-fill"></i>
+                                        <i class="bi bi-star-fill"></i>
+                                        <i class="bi bi-star-fill"></i>
+                                    </div>
+                <p class="testimonial-text">"Nous avons commandé traiteur pour un évènement familial : prestation de très bonne qualité, quantité et choix copieux."</p>
+                <div class="testimonial-author testimonial-author-modern">
+                    <i class="bi bi-person-circle"></i>
+                    Rébecca C.                </div>
+            </div>
+                        <div class="testimonial-card testimonial-card-modern fade-in">
+                <div class="testimonial-stars testimonial-stars-modern">
+                                        <i class="bi bi-star-fill"></i>
+                                        <i class="bi bi-star-fill"></i>
+                                        <i class="bi bi-star-fill"></i>
+                                        <i class="bi bi-star-fill"></i>
+                                        <i class="bi bi-star-fill"></i>
+                                    </div>
+                <p class="testimonial-text">"Super café, délicieux croissants et pains au chocolat. Équipe conviviale et accueillante !"</p>
+                <div class="testimonial-author testimonial-author-modern">
+                    <i class="bi bi-person-circle"></i>
+                    Marie L.                </div>
+            </div>
+                    </div>
+        
+        <div class="text-center mt-4">
+            <a href="https://www.google.com/maps/place/Café+Concept" target="_blank" class="btn btn-outline-gold btn-lg">
+                <i class="bi bi-google"></i>
+                <span>Voir tous les avis Google</span>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================
+     CTA TRAITEUR - DESIGN MODERNE AVEC OR
+     ============================================ -->
+<section class="section section-cta-traiteur">
+    <div class="container">
+        <div class="cta-traiteur-wrapper">
+            <div class="cta-traiteur-content">
+                <span class="cta-badge">
+                    <i class="bi bi-calendar-event"></i>
+                    Service Traiteur
+                </span>
+                <h2 class="cta-title">Un événement à organiser ?</h2>
+                <p class="cta-description">
+                    Anniversaires, mariages, baptêmes, séminaires d'entreprise... 
+                    Notre service traiteur s'adapte à toutes vos envies avec des menus personnalisés.
+                </p>
+                <ul class="cta-features">
+                    <li>
+                        <i class="bi bi-check-circle-fill"></i>
+                        <span>Devis gratuit sous 24h</span>
+                    </li>
+                    <li>
+                        <i class="bi bi-check-circle-fill"></i>
+                        <span>Menu personnalisable</span>
+                    </li>
+                    <li>
+                        <i class="bi bi-check-circle-fill"></i>
+                        <span>Livraison et installation</span>
+                    </li>
+                </ul>
+                <a href="traiteur.php" class="btn btn-gold btn-lg cta-button">
+                    <i class="bi bi-calendar-check"></i>
+                    <span>Demander un devis gratuit</span>
+                </a>
+            </div>
+            <div class="cta-traiteur-visual">
+                <div class="cta-visual-icon">
+                    <i class="bi bi-calendar-event"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================
+     HORAIRES & LOCALISATION - DESIGN MODERNE
+     ============================================ -->
+<section class="section location-section">
+    <div class="container">
+        <div class="section-header">
+            <h2>Où nous trouver</h2>
+            <p>Venez nous rendre visite ou contactez-nous</p>
+        </div>
+        
+        <div class="row location-row">
+            <!-- Horaires -->
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="location-card hours-card">
+                    <div class="location-card-header">
+                        <div class="location-icon-wrapper">
+                            <i class="bi bi-clock-fill"></i>
+                        </div>
+                        <h3>Nos Horaires</h3>
+                    </div>
+                    <div class="location-card-body">
+                                            <div class="modern-horaires-list">
+                                                                                    <div class="modern-horaire-item active">
+                                <div class="horaire-day">
+                                    <span class="day-name">Lundi</span>
+                                                                            <span class="today-badge">Aujourd'hui</span>
+                                                                    </div>
+                                <div class="horaire-time">
+                                    <strong>8h30 - 20h</strong>
+                                </div>
+                            </div>
+                                                                                    <div class="modern-horaire-item ">
+                                <div class="horaire-day">
+                                    <span class="day-name">Mardi</span>
+                                                                    </div>
+                                <div class="horaire-time">
+                                    <strong>8h30 - 20h</strong>
+                                </div>
+                            </div>
+                                                                                    <div class="modern-horaire-item ">
+                                <div class="horaire-day">
+                                    <span class="day-name">Mercredi</span>
+                                                                    </div>
+                                <div class="horaire-time">
+                                    <strong>8h30 - 20h</strong>
+                                </div>
+                            </div>
+                                                                                    <div class="modern-horaire-item ">
+                                <div class="horaire-day">
+                                    <span class="day-name">Jeudi</span>
+                                                                    </div>
+                                <div class="horaire-time">
+                                    <strong>8h30 - 20h</strong>
+                                </div>
+                            </div>
+                                                                                    <div class="modern-horaire-item ">
+                                <div class="horaire-day">
+                                    <span class="day-name">Vendredi</span>
+                                                                    </div>
+                                <div class="horaire-time">
+                                    <strong>8h30 - 20h</strong>
+                                </div>
+                            </div>
+                                                                                    <div class="modern-horaire-item ">
+                                <div class="horaire-day">
+                                    <span class="day-name">Samedi</span>
+                                                                    </div>
+                                <div class="horaire-time">
+                                    <strong>9h30 - 20h</strong>
+                                </div>
+                            </div>
+                                                                                    <div class="modern-horaire-item ">
+                                <div class="horaire-day">
+                                    <span class="day-name">Dimanche</span>
+                                                                    </div>
+                                <div class="horaire-time">
+                                    <strong>Fermé</strong>
+                                </div>
+                            </div>
+                                                    </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Contact -->
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="location-card contact-card">
+                    <div class="location-card-header">
+                        <div class="location-icon-wrapper">
+                            <i class="bi bi-telephone-fill"></i>
+                        </div>
+                        <h3>Contactez-nous</h3>
+                    </div>
+                    <div class="location-card-body">
+                        <div class="contact-info-item">
+                            <div class="contact-icon">
+                                <i class="bi bi-geo-alt-fill"></i>
+                            </div>
+                            <div class="contact-details">
+                                <strong><span class="cafe-part">café</span> <span class="concept-part">CONCEPT</span></strong>
+                                <p>502 Avenue des Meuniers<br>77550 Moissy-Cramayel</p>
+                            </div>
+                        </div>
+                        
+                        <div class="contact-info-item">
+                            <div class="contact-icon">
+                                <i class="bi bi-telephone-fill"></i>
+                            </div>
+                            <div class="contact-details">
+                                <a href="tel:0666028603" class="contact-link">
+                                    06 66 02 86 03                        </a>
+                            </div>
+                        </div>
+                        
+                        <div class="contact-info-item">
+                            <div class="contact-icon">
+                                <i class="bi bi-envelope-fill"></i>
+                            </div>
+                            <div class="contact-details">
+                                <a href="mailto:cafe.concept@outlook.fr" class="contact-link">
+                                    cafe.concept@outlook.fr                        </a>
+                            </div>
+                        </div>
+                        
+                        <a href="contact.php" class="btn btn-primary btn-block mt-3">
+                            <i class="bi bi-chat-dots me-2"></i>Nous contacter
+                    </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Carte -->
+            <div class="col-lg-4 col-md-12 mb-4">
+                <div class="location-card map-card">
+                    <div class="location-card-header">
+                        <div class="location-icon-wrapper">
+                            <i class="bi bi-map-fill"></i>
+                        </div>
+                        <h3>Localisation</h3>
+                    </div>
+                    <div class="location-card-body p-0">
+                        <div class="map-container">
+                            <iframe 
+                                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2633.5!2d2.5977!3d48.6247!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNDjCsDM3JzI5LjAiTiAywrAzNSc1MS43IkU!5e0!3m2!1sfr!2sfr!4v1635000000000" 
+                                width="100%" 
+                                height="300" 
+                                style="border:0; border-radius: 0 0 16px 16px;" 
+                                allowfullscreen="" 
+                                loading="lazy" 
+                                referrerpolicy="no-referrer-when-downgrade">
+                            </iframe>
+                            <div class="map-overlay">
+                                <a href="https://www.google.com/maps/place/502+Avenue+des+Meuniers,+77550+Moissy-Cramayel" 
+                                   target="_blank" 
+                                   class="btn btn-sm btn-light">
+                                    <i class="bi bi-box-arrow-up-right me-1"></i>Ouvrir dans Google Maps
+                            </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================
+     CTA FINAL - DESIGN MODERNE AVEC OR
+     ============================================ -->
+<section class="section section-cta-final">
+    <div class="container">
+        <div class="cta-final-content">
+            <h2 class="cta-final-title">Prêt à commander ?</h2>
+            <p class="cta-final-description">
+            Découvrez notre menu et faites-vous plaisir avec nos spécialités maison !
+        </p>
+            <div class="cta-final-actions">
+                <a href="menu-food.php" class="btn btn-gold btn-lg">
+                    <i class="bi bi-menu-up"></i>
+                    <span>Voir le Menu</span>
+            </a>
+                <a href="tel:0666028603" class="btn btn-outline-gold btn-lg">
+                    <i class="bi bi-telephone"></i>
+                    <span>06 66 02 86 03</span>
+            </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+// Lazy loading ultra-rapide (pas d'attente DOMContentLoaded)
+(function() {
+    const sections = document.querySelectorAll('.section:not(.hero-image)');
+    if ('IntersectionObserver' in window) {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('fade-in');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { rootMargin: '100px' });
+        sections.forEach(section => observer.observe(section));
+    } else {
+        sections.forEach(section => section.classList.add('fade-in'));
+    }
+})();
+</script>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div>
+                    <h4><span class="cafe-part">café</span> <span class="concept-part">CONCEPT</span></h4>
+                    <p>Restaurant & Traiteur à Moissy-Cramayel. Cuisine savoureuse et authentique.</p>
+                </div>
+                <div>
+                    <h4>Horaires</h4>
+                    <p>
+                                                    Lun : 8h30 - 20h<br>
+                                                    Mar : 8h30 - 20h<br>
+                                                    Mer : 8h30 - 20h<br>
+                                                    Jeu : 8h30 - 20h<br>
+                                                    Ven : 8h30 - 20h<br>
+                                                    Sam : 9h30 - 20h<br>
+                                                    Dim : Fermé<br>
+                                            </p>
+                </div>
+                <div>
+                    <h4>Contact</h4>
+                    <p>
+                        <i class="bi bi-geo-alt"></i> 502 Av. des Meuniers<br>
+                        77550 Moissy-Cramayel<br>
+                        <i class="bi bi-telephone"></i> 06 66 02 86 03                    </p>
+                </div>
+                <div>
+                    <h4>Liens</h4>
+                    <p>
+                        <a href="menu-food.php">Notre Menu</a><br>
+                        <a href="traiteur.php">Service Traiteur</a><br>
+                        <a href="contact.php">Nous contacter</a>
+                    </p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p class="mb-0">&copy; 2026 Café Concept. Tous droits réservés.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <script>
+        // Navigation scroll effect
+        window.addEventListener('scroll', () => {
+            document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 50);
+        });
+    </script>
+</body>
+</html>
