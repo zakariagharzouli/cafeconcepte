@@ -46,3 +46,30 @@ Stage Summary:
 - SEO local intégré (JSON-LD Restaurant, note 4,9, horaires, geo) — corrige les failles de l'ancien site
 - Performance maîtrisée : images locales optimisées via next/image, WebGL clampé (dpr 1.75), frameloop toujours actif (amélioration possible : pause hors viewport)
 - Aucune erreur lint, aucun warning GSAP, aucun erreur runtime constatée en vérification navigateur
+
+---
+Task ID: 3
+Agent: Super Z (main)
+Task: Application de la grammaire design "Sylva — Living Green" (fichier 22.txt fourni par l'utilisateur) — correction des 3 griefs : effet curseur, cards génériques, layout générique
+
+Work Log:
+- Analyse de 22.txt : bundle source ThreeUI "Sylva Living Green" — config typo exacte (Lexend 300 partout, heading 63px, tracking -0.006em, body 16.5px), pattern dock verre (items data-near par proximité, JAMAIS de backdrop-filter global sur le dock, frost borné à la pilule CTA blur 13 saturate 1.16), esprit "monde vivant"
+- Suppression totale du hijack curseur : CustomCursor.tsx et Magnetic.tsx supprimés, classe cursor-none-fine retirée du body — curseur natif, interactions par proximité uniquement
+- Polices : Baloo 2 + Poppins remplacés par Lexend (variable) via next/font ; globals.css : utilitaires Sylva (.display-light, .micro-caps, .hairline, .frost-pill, .dock-panel, .dock-item[data-near], .numeral-cream/espresso)
+- Dock.tsx (nouveau, remplace Navbar.tsx) : dock flottant translucide façon Sylva, items qui s'illuminent par proximité pointeur (rAF + data-near), dock-mark badge, CTA téléphone en frost pill, overlay mobile conservé (clip-path) retyposé Lexend light ; garde média retirée (pointermove inoffensif en tactile)
+- Hero.tsx recomposé : ancrage bas façon Sylva, typo light blanche, eyebrow micro-caps + filet, CTA frost pill + cercle frost téléphone, stats en baseline fine sur filet, indicateur scroll "filet qui coule" (keyframes scroll-drip), voiles allégés (gradient bas uniquement)
+- Marquee : gros bandeau caramel incliné remplacé par bande fine typographique (uppercase light, tracking 0.32em, points caramel, hairlines)
+- Engagements : cards boxées + carrés icônes remplacés par liste éditoriale numérotée (01/02/03 stroke) sur filets hairline ; pastille 100% maison fine cerclée ; photo latte flottante conservée
+- Signatures : cards blanches boxées remplacées par planches de galerie éditoriale (image organique 4/5, numéral géant stroke chevauchant, titre light, tag micro-caps, prix fin sur filet, offsets asymétriques pairs/impairs) ; scroll horizontal épinglé conservé
+- MenuSection : grille de cards + pilules emoji remplacées par vraie carte typographique (2 colonnes, nom + prix alignés, description fine, tags micro-caps, filets) ; onglets texte avec soulignement caramel animé
+- Traiteur : offres en liste numérotée sur filets, "Devis gratuit" en frost pill rotatif, chips fines cerclées, CTA frost
+- Reviews : boxes à avatars remplacées par citations en colonnes sur filets (note 4,9 géante en Lexend light, numéros stroke, lien Google souligné animé)
+- Contact : infos en liste sur filets, formulaire allégé (inputs transparents, sujets en boutons texte soulignés, submit espresso-deep) — logique zod/API/toast inchangée
+- Footer + Preloader : retouche light (watermark "à bientôt" en 300, wordmark tracking large)
+- Correctifs vérifiés navigateur : titre hero mobile qui coupait ("maison" sur 3 lignes) → 11.8vw ; section Signatures épinglée qui passait sous le dock → géométrie compactée (titre 2.7/3.1rem, planches 16.5/18.5rem, offsets mt-6) ; proximité dock inactive en headless (pointer: fine non reporté) → garde média retirée, effet vérifié (Signatures:true)
+- Vérifié via agent-browser : hero desktop+mobile, marquee, engagements, signatures épinglées (géométrie mesurée : evenBottom 841, oddBottom 865 < 900), onglet Burgers (7 items), overlay mobile, formulaire de contact soumis (toast "Message envoyé !" + enregistrement "Test Redesign" vérifié en base), proximité dock, zéro erreur console, lint propre
+
+Stage Summary:
+- Les 3 griefs utilisateur corrigés : plus AUCUN effet curseur custom (proximité Sylva à la place), plus aucune card générique (listes éditoriales numérotées, galerie de planches, carte typographique), layout non template (Lexend 300, dock verre, frost pills bornées, filets hairline, numéros stroke)
+- Grammaire Sylva Living Green appliquée fidèlement : config typo exacte du bundle, pattern dock autho (pas de blur global), un seul frosted réel par vue
+- Fonctionnalités intactes : formulaire + DB, onglets menu, scroll horizontal épinglé, overlay mobile, SEO JSON-LD

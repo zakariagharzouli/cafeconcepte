@@ -1,7 +1,5 @@
 "use client";
 
-import { Coffee } from "lucide-react";
-
 const ITEMS = [
   "Fait maison",
   "Saveurs asiatiques",
@@ -12,26 +10,23 @@ const ITEMS = [
   "Café de spécialité",
 ];
 
+/* Bande typographique fine — filets hairline, texte light, points caramel.
+   Plus de bandeau caramel massif incliné : le calme éditorial remplace
+   l'accroche promo. */
 export default function Marquee() {
   const row = [...ITEMS, ...ITEMS];
 
   return (
-    <section aria-hidden="true" className="relative z-20 -my-8 rotate-[-1.6deg] scale-[1.03]">
-      <div className="overflow-hidden border-y-4 border-espresso-deep bg-grad-caramel py-4 shadow-xl shadow-espresso/20">
-        <div className="animate-marquee flex w-max items-center gap-8 pr-8 [--marquee-duration:26s]">
-          {row.map((item, i) => (
-            <span key={i} className="flex items-center gap-8">
-              <span className="whitespace-nowrap font-display text-2xl font-bold uppercase tracking-wide text-espresso-deep md:text-3xl">
-                {item}
-              </span>
-              <Coffee
-                size={22}
-                className="shrink-0 text-espresso-deep/70"
-                aria-hidden="true"
-              />
+    <section aria-hidden="true" className="relative z-10 border-y border-espresso/10 bg-cream-soft py-5">
+      <div className="animate-marquee flex w-max items-center gap-10 pr-10 [--marquee-duration:34s]">
+        {row.map((item, i) => (
+          <span key={i} className="flex items-center gap-10">
+            <span className="whitespace-nowrap font-body text-sm font-light uppercase tracking-[0.32em] text-espresso/70">
+              {item}
             </span>
-          ))}
-        </div>
+            <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-caramel/60" aria-hidden="true" />
+          </span>
+        ))}
       </div>
     </section>
   );

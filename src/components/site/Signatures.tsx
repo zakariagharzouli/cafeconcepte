@@ -4,9 +4,8 @@ import { useEffect, useRef } from "react";
 import Image from "next/image";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { ArrowRight, Flame } from "lucide-react";
 import { formatPrice } from "@/lib/menu-data";
-import { scrollTo } from "./Navbar";
+import { scrollTo } from "./Dock";
 
 const SIGNATURES = [
   {
@@ -56,6 +55,9 @@ const SIGNATURES = [
   },
 ];
 
+/* Galerie éditoriale — chaque plat est une planche de expo :
+   grande image organique, numéral géant en contour, titre light,
+   prix fin sur filet. Décalages verticaux asymétriques. */
 export default function Signatures() {
   const rootRef = useRef<HTMLElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
@@ -70,7 +72,7 @@ export default function Signatures() {
       // Titre
       gsap.fromTo(
         ".sig-header > *",
-        { y: 44, opacity: 0 },
+        { y: 40, opacity: 0 },
         {
           y: 0,
           opacity: 1,
@@ -106,8 +108,8 @@ export default function Signatures() {
           },
         });
 
-        // léger décalage parallaxe sur les images des cartes
-        root.querySelectorAll<HTMLElement>(".sig-card-img img").forEach((img) => {
+        // parallaxe interne des images
+        root.querySelectorAll<HTMLElement>(".sig-img img").forEach((img) => {
           gsap.fromTo(
             img,
             { xPercent: -6 },
@@ -131,8 +133,8 @@ export default function Signatures() {
       /* Mobile / tablette : apparition simple */
       mm.add("(max-width: 1023px)", () => {
         gsap.fromTo(
-          ".sig-card",
-          { y: 60, opacity: 0 },
+          ".sig-panel",
+          { y: 50, opacity: 0 },
           {
             y: 0,
             opacity: 1,
@@ -156,80 +158,79 @@ export default function Signatures() {
     >
       <div className="relative flex h-full flex-col justify-center py-24 lg:py-0">
         {/* En-tête */}
-        <div className="sig-header mx-auto w-full max-w-7xl px-5 md:px-10 lg:pt-28">
-          <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-caramel-light/30 px-4 py-1.5 font-body text-[11px] font-semibold uppercase tracking-[0.28em] text-caramel-light">
-            <Flame size={13} aria-hidden="true" />
+        <div className="sig-header mx-auto w-full max-w-7xl px-5 md:px-10 lg:pt-24">
+          <p className="micro-caps mb-6 flex items-center gap-4 text-caramel-light/85">
+            <span className="inline-block h-px w-10 bg-caramel-light/60" aria-hidden="true" />
             Nos créations signatures
           </p>
           <div className="flex flex-wrap items-end justify-between gap-6">
-            <h2 className="font-display text-4xl font-bold leading-[1.02] tracking-tight text-cream-soft sm:text-5xl md:text-7xl">
+            <h2 className="display-light text-4xl leading-[1.06] text-cream-soft sm:text-5xl md:text-[2.7rem] xl:text-[3.1rem]">
               Les plats qui font
               <br />
               <span className="text-caramel-light">la réputation</span>
             </h2>
-            <p className="max-w-sm font-body text-sm leading-relaxed text-cream-soft/65 md:text-base">
+            <p className="hidden max-w-sm font-body text-[15px] font-light leading-[1.75] text-cream-soft/60 xl:block">
               Préparés à la commande, avec le sourire. Faites défiler —
               chaque assiette a son histoire.
             </p>
           </div>
         </div>
 
-        {/* Piste desktop */}
-        <div className="mt-12 hidden lg:block">
-          <div ref={trackRef} className="flex w-max items-stretch gap-8 px-[6vw] will-change-transform">
-            {SIGNATURES.map((dish) => (
+        {/* Piste desktop — planches éditoriales */}
+        <div className="mt-6 hidden lg:block">
+          <div ref={trackRef} className="flex w-max items-start gap-14 px-[6vw] will-change-transform xl:gap-16">
+            {SIGNATURES.map((dish, i) => (
               <article
                 key={dish.id}
-                className="sig-card group relative flex w-[24rem] shrink-0 flex-col overflow-hidden rounded-[2.5rem] bg-cream-soft shadow-2xl shadow-black/30 transition-transform duration-500 hover:-translate-y-2 xl:w-[26rem]"
+                className={`sig-panel group relative w-[16.5rem] shrink-0 xl:w-[18.5rem] ${
+                  i % 2 === 1 ? "mt-6" : ""
+                }`}
               >
-                <div className="sig-card-img mask-blob relative m-4 mb-0 aspect-[5/4] overflow-hidden">
-                  <Image
-                    src={dish.image}
-                    alt={`${dish.name} — Café Concept`}
-                    fill
-                    sizes="420px"
-                    className="scale-110 object-cover will-change-transform"
-                  />
-                  <span className="absolute left-4 top-4 rounded-full bg-cream-soft/90 px-3.5 py-1.5 font-body text-[11px] font-bold uppercase tracking-wider text-espresso backdrop-blur">
-                    {dish.tag}
-                  </span>
-                </div>
-                <div className="flex flex-1 flex-col p-6 pt-5">
-                  <span className="font-display text-5xl font-bold text-stroke-espresso absolute right-6 top-24 select-none opacity-60" aria-hidden="true">
+                {/* Image organique + numéral géant qui chevauche */}
+                <div className="relative">
+                  <div className="sig-img mask-blob relative aspect-[4/5] overflow-hidden">
+                    <Image
+                      src={dish.image}
+                      alt={`${dish.name} — Café Concept`}
+                      fill
+                      sizes="420px"
+                      className="scale-110 object-cover will-change-transform"
+                    />
+                  </div>
+                  <span
+                    className="numeral-cream display-light absolute -bottom-7 -left-2 select-none text-[7rem] leading-none xl:text-[8rem]"
+                    aria-hidden="true"
+                  >
                     {dish.index}
                   </span>
-                  <h3 className="font-display text-2xl font-bold text-espresso-deep">
+                </div>
+
+                {/* Légende typographique */}
+                <div className="mt-8">
+                  <p className="micro-caps text-caramel-light/75">{dish.tag}</p>
+                  <h3 className="display-light mt-2 text-2xl text-cream-soft">
                     {dish.name}
                   </h3>
-                  <p className="mt-2 flex-1 font-body text-sm leading-relaxed text-cocoa">
+                  <p className="mt-2 line-clamp-3 font-body text-[13.5px] font-light leading-[1.65] text-cream-soft/60">
                     {dish.desc}
                   </p>
-                  <div className="mt-4 flex items-center justify-between">
-                    <span className="font-display text-2xl font-bold text-caramel">
-                      {formatPrice(dish.price)}
-                    </span>
-                    <button
-                      onClick={() => scrollTo("#menu")}
-                      className="flex h-10 w-10 items-center justify-center rounded-full bg-espresso text-cream-soft transition-all duration-300 group-hover:bg-caramel group-hover:text-espresso-deep group-hover:rotate-[-35deg]"
-                      aria-label={`Voir ${dish.name} dans le menu`}
-                    >
-                      <ArrowRight size={17} aria-hidden="true" />
-                    </button>
-                  </div>
+                  <p className="display-light mt-3.5 border-t border-cream-soft/12 pt-3 text-xl text-caramel-light">
+                    {formatPrice(dish.price)}
+                  </p>
                 </div>
               </article>
             ))}
 
-            {/* Carte CTA finale */}
-            <div className="flex w-[22rem] shrink-0 flex-col items-center justify-center rounded-[2.5rem] border-2 border-dashed border-caramel-light/35 p-10 text-center">
-              <p className="font-display text-3xl font-bold text-cream-soft">
+            {/* Planche finale CTA */}
+            <div className="flex w-[20rem] shrink-0 flex-col items-start justify-center self-center py-10">
+              <p className="display-light text-4xl leading-[1.15] text-cream-soft">
                 Et 70 autres
                 <br />
                 <span className="text-caramel-light">gourmandises…</span>
               </p>
               <button
                 onClick={() => scrollTo("#menu")}
-                className="mt-8 rounded-full bg-grad-caramel px-8 py-4 font-body font-semibold text-espresso-deep shadow-lg shadow-caramel/25 transition-transform hover:scale-105"
+                className="frost-pill mt-9 px-8 py-4 font-body text-[15px] font-light text-cream-soft transition-colors duration-300 hover:border-caramel-light/50 hover:text-caramel-light"
               >
                 Voir tout le menu
               </button>
@@ -239,52 +240,45 @@ export default function Signatures() {
 
         {/* Piste mobile : scroll natif snap */}
         <div className="sig-mobile-track mt-10 lg:hidden">
-          <div className="flex snap-x snap-mandatory gap-6 overflow-x-auto px-5 pb-4 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <div className="flex snap-x snap-mandatory gap-10 overflow-x-auto px-5 pb-4 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {SIGNATURES.map((dish) => (
-              <article
-                key={dish.id}
-                className="sig-card w-[80vw] max-w-[20rem] shrink-0 snap-center overflow-hidden rounded-[2rem] bg-cream-soft shadow-xl shadow-black/25"
-              >
-                <div className="relative aspect-[5/4] overflow-hidden">
-                  <Image
-                    src={dish.image}
-                    alt={`${dish.name} — Café Concept`}
-                    fill
-                    sizes="80vw"
-                    className="object-cover"
-                  />
-                  <span className="absolute left-4 top-4 rounded-full bg-cream-soft/90 px-3.5 py-1.5 font-body text-[11px] font-bold uppercase tracking-wider text-espresso">
-                    {dish.tag}
+              <article key={dish.id} className="sig-panel w-[76vw] max-w-[19rem] shrink-0 snap-center">
+                <div className="relative">
+                  <div className="mask-blob relative aspect-[4/5] overflow-hidden">
+                    <Image
+                      src={dish.image}
+                      alt={`${dish.name} — Café Concept`}
+                      fill
+                      sizes="76vw"
+                      className="object-cover"
+                    />
+                  </div>
+                  <span
+                    className="numeral-cream display-light absolute -bottom-5 -left-1 select-none text-7xl leading-none"
+                    aria-hidden="true"
+                  >
+                    {dish.index}
                   </span>
                 </div>
-                <div className="p-5">
-                  <h3 className="font-display text-xl font-bold text-espresso-deep">
-                    {dish.name}
-                  </h3>
-                  <p className="mt-1.5 line-clamp-2 font-body text-sm text-cocoa">
+                <div className="mt-9">
+                  <p className="micro-caps text-caramel-light/75">{dish.tag}</p>
+                  <h3 className="display-light mt-2 text-2xl text-cream-soft">{dish.name}</h3>
+                  <p className="mt-2 font-body text-[13.5px] font-light leading-[1.7] text-cream-soft/60">
                     {dish.desc}
                   </p>
-                  <div className="mt-3 flex items-center justify-between">
-                    <span className="font-display text-xl font-bold text-caramel">
-                      {formatPrice(dish.price)}
-                    </span>
-                    <button
-                      onClick={() => scrollTo("#menu")}
-                      className="rounded-full bg-espresso px-4 py-2 font-body text-xs font-semibold text-cream-soft"
-                    >
-                      Voir le menu
-                    </button>
-                  </div>
+                  <p className="display-light mt-4 border-t border-cream-soft/12 pt-3 text-xl text-caramel-light">
+                    {formatPrice(dish.price)}
+                  </p>
                 </div>
               </article>
             ))}
           </div>
         </div>
 
-        {/* Barre de progression desktop */}
-        <div className="mx-auto mt-10 hidden w-[6vw] lg:block">
-          <div className="h-1 overflow-hidden rounded-full bg-cream-soft/15">
-            <div className="sig-progress h-full w-full origin-left scale-x-0 rounded-full bg-grad-caramel" />
+        {/* Filet de progression desktop */}
+        <div className="mx-auto mt-6 hidden w-[5vw] lg:block">
+          <div className="h-px overflow-hidden bg-cream-soft/15">
+            <div className="sig-progress h-full w-full origin-left scale-x-0 bg-caramel-light" />
           </div>
         </div>
       </div>

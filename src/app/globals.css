@@ -38,9 +38,10 @@
   --color-input: color-mix(in oklab, var(--cc-espresso) 18%, transparent);
   --color-ring: var(--cc-caramel);
 
-  --font-display: var(--font-baloo), ui-rounded, system-ui, sans-serif;
-  --font-body: var(--font-poppins), ui-sans-serif, system-ui, sans-serif;
-  --font-sans: var(--font-poppins), ui-sans-serif, system-ui, sans-serif;
+  /* Sylva Living Green — Lexend 300 partout, tracking display serré */
+  --font-display: var(--font-lexend), system-ui, sans-serif;
+  --font-body: var(--font-lexend), system-ui, sans-serif;
+  --font-sans: var(--font-lexend), system-ui, sans-serif;
 
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -148,7 +149,13 @@ body {
   100% { transform: translateY(-70px) scaleX(1.6); opacity: 0; }
 }
 
-/* Texte outline caramel */
+/* Indicateur scroll hero — filet qui coule */
+@keyframes scroll-drip {
+  0% { transform: translateY(-100%); }
+  60%, 100% { transform: translateY(400%); }
+}
+
+/* Texte outline (conservé pour usages ponctuels) */
 .text-stroke-cream {
   -webkit-text-stroke: 1.5px color-mix(in oklab, var(--cc-cream) 55%, transparent);
   color: transparent;
@@ -194,11 +201,76 @@ body {
   transform-origin: left;
 }
 
-/* Curseur custom : masqué sur pointeurs fins */
-@media (pointer: fine) {
-  .cursor-none-fine, .cursor-none-fine * {
-    cursor: none !important;
-  }
+/* ─── Grammaire Sylva Living Green ─────────────────────── */
+
+/* Typo display : Lexend 300, tracking -0.006em (config 22.txt) */
+.display-light {
+  font-family: var(--font-display);
+  font-weight: 300;
+  letter-spacing: -0.006em;
+}
+
+/* Micro-caps éditorial */
+.micro-caps {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+}
+
+/* Hairline — filets fins éditoriaux */
+.hairline-t { border-top: 1px solid color-mix(in oklab, currentColor 16%, transparent); }
+.hairline-b { border-bottom: 1px solid color-mix(in oklab, currentColor 16%, transparent); }
+
+/* Frost pill — le frosted bounded du hero Sylva :
+   backdrop-filter limité à la pilule elle-même (jamais sur
+   un conteneur large, cf. note perf du document autho). */
+.frost-pill {
+  border-radius: 999px;
+  -webkit-backdrop-filter: blur(13px) saturate(1.16);
+  backdrop-filter: blur(13px) saturate(1.16);
+  background: rgba(90, 63, 41, 0.22);
+  border: 1px solid rgba(246, 233, 219, 0.18);
+}
+.frost-pill--light {
+  background: rgba(251, 244, 236, 0.4);
+  border: 1px solid rgba(60, 42, 28, 0.1);
+}
+
+/* Dock verre — le dock autho ne porte JAMAIS de backdrop-filter
+   global (repaint canvas + blur = ~20fps perdus). Panneau translucide
+   seul, et items qui s'allument par proximité (data-near). */
+.dock-panel {
+  border: 1px solid rgba(246, 233, 219, 0.13);
+  background:
+    linear-gradient(180deg, rgba(246, 233, 219, 0.06), rgba(246, 233, 219, 0) 42%),
+    rgba(38, 27, 18, 0.76);
+  box-shadow:
+    0 8px 22px rgba(20, 10, 18, 0.34),
+    inset 0 1px rgba(246, 233, 219, 0.07);
+}
+.dock-item {
+  border: 1px solid transparent;
+  transition:
+    background-color 0.35s ease,
+    border-color 0.35s ease,
+    box-shadow 0.35s ease,
+    transform 0.35s ease;
+}
+.dock-item[data-near="true"] {
+  border-color: rgba(246, 233, 219, 0.2);
+  background: rgba(58, 42, 28, 0.94);
+  box-shadow: 0 7px 16px rgba(20, 10, 18, 0.32);
+}
+
+/* Numéral éditorial crème (grand chiffre stroke) */
+.numeral-cream {
+  -webkit-text-stroke: 1px color-mix(in oklab, var(--cc-cream-soft) 42%, transparent);
+  color: transparent;
+}
+.numeral-espresso {
+  -webkit-text-stroke: 1px color-mix(in oklab, var(--cc-espresso) 30%, transparent);
+  color: transparent;
 }
 
 /* Masque blob pour images */

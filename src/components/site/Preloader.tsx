@@ -109,7 +109,7 @@ export default function Preloader() {
         </span>
       </div>
 
-      <p className="mt-8 font-display text-cream-soft text-xl md:text-2xl font-semibold tracking-[0.35em] uppercase">
+      <p className="display-light mt-8 text-xl uppercase tracking-[0.42em] text-cream-soft md:text-2xl">
         Café Concept
       </p>
 
@@ -119,7 +119,7 @@ export default function Preloader() {
 
       <span
         ref={counterRef}
-        className="mt-3 font-display text-caramel-light text-sm tracking-[0.3em]"
+        className="mt-3 font-body text-sm font-light tracking-[0.3em] text-caramel-light"
       >
         000
       </span>

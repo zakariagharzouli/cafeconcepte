@@ -1,19 +1,15 @@
 import type { Metadata, Viewport } from "next";
-import { Baloo_2, Poppins } from "next/font/google";
+import { Lexend } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import SmoothScroll from "@/components/site/SmoothScroll";
 
-const baloo = Baloo_2({
-  variable: "--font-baloo",
+/* Sylva Living Green — config typographique appliquée :
+   headingFont/bodyFont Lexend · weight 300 · headingSize 63 ·
+   letterSpacing -0.006em · bodySize 16.5px */
+const lexend = Lexend({
+  variable: "--font-lexend",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
-});
-
-const poppins = Poppins({
-  variable: "--font-poppins",
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -105,7 +101,7 @@ export default function RootLayout({
   return (
     <html lang="fr" suppressHydrationWarning>
       <body
-        className={`${baloo.variable} ${poppins.variable} font-sans antialiased cursor-none-fine`}
+        className={`${lexend.variable} font-sans antialiased`}
       >
         <script
           type="application/ld+json"

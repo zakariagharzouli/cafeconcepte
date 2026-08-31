@@ -1,6 +1,5 @@
 import Preloader from "@/components/site/Preloader";
-import CustomCursor from "@/components/site/CustomCursor";
-import Navbar from "@/components/site/Navbar";
+import Dock from "@/components/site/Dock";
 import Hero from "@/components/site/Hero";
 import Marquee from "@/components/site/Marquee";
 import Engagements from "@/components/site/Engagements";
@@ -15,8 +14,7 @@ export default function Home() {
   return (
     <div className="grain relative min-h-screen flex flex-col">
       <Preloader />
-      <CustomCursor />
-      <Navbar />
+      <Dock />
 
       <main className="flex-1">
         <Hero />

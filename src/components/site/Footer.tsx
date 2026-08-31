@@ -5,7 +5,7 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { MapPin, Phone, Mail, Clock } from "lucide-react";
 import { SITE } from "@/lib/site-data";
-import { scrollTo } from "./Navbar";
+import { scrollTo } from "./Dock";
 
 const LINKS = [
   { href: "#signatures", label: "Signatures" },
@@ -74,13 +74,13 @@ export default function Footer() {
         {/* Navigation */}
         <nav
           aria-label="Navigation pied de page"
-          className="mt-12 flex flex-wrap items-center justify-center gap-x-8 gap-y-3"
+          className="mt-12 flex flex-wrap items-center justify-center gap-x-9 gap-y-3"
         >
           {LINKS.map((l) => (
             <button
               key={l.href}
               onClick={() => scrollTo(l.href)}
-              className="link-underline font-body text-sm font-medium text-cream-soft/75 transition-colors hover:text-caramel-light"
+              className="link-underline font-body text-sm font-light tracking-[0.03em] text-cream-soft/70 transition-colors hover:text-caramel-light"
             >
               {l.label}
             </button>
@@ -91,7 +91,7 @@ export default function Footer() {
         <div className="mt-14 grid gap-8 border-t border-cream-soft/10 pt-10 text-sm md:grid-cols-3">
           <div className="flex items-start gap-3">
             <MapPin size={17} className="mt-0.5 shrink-0 text-caramel-light" aria-hidden="true" />
-            <p className="font-body leading-relaxed text-cream-soft/65">
+            <p className="font-body text-sm font-light leading-[1.8] text-cream-soft/60">
               {SITE.address}
               <br />
               <a
@@ -106,7 +106,7 @@ export default function Footer() {
           </div>
           <div className="flex items-start gap-3">
             <Clock size={17} className="mt-0.5 shrink-0 text-caramel-light" aria-hidden="true" />
-            <p className="font-body leading-relaxed text-cream-soft/65">
+            <p className="font-body text-sm font-light leading-[1.8] text-cream-soft/60">
               Lun – Ven : 8h30 – 20h
               <br />
               Samedi : 9h30 – 20h
@@ -116,7 +116,7 @@ export default function Footer() {
           </div>
           <div className="flex items-start gap-3">
             <Phone size={17} className="mt-0.5 shrink-0 text-caramel-light" aria-hidden="true" />
-            <p className="font-body leading-relaxed text-cream-soft/65">
+            <p className="font-body text-sm font-light leading-[1.8] text-cream-soft/60">
               <a href={SITE.phoneHref} className="transition-colors hover:text-caramel-light">
                 {SITE.phone}
               </a>
@@ -128,10 +128,10 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* Grand merci */}
+        {/* Grand merci — watermark light */}
         <p
           aria-hidden="true"
-          className="foot-thanks mt-16 select-none text-center font-display text-[16vw] font-bold leading-none tracking-tight text-cream-soft/[0.055] md:text-[9rem]"
+          className="display-light foot-thanks mt-16 select-none text-center text-[16vw] leading-none text-cream-soft/[0.05] md:text-[9rem]"
         >
           à bientôt
         </p>
