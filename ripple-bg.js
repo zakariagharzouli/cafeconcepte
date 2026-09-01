@@ -110,6 +110,13 @@ void main() {
   class RippleBg extends HTMLElement {
     connectedCallback() {
       if (this.canvas) return;
+      /* Un canvas peut deja etre la sans que this.canvas le soit : le runtime
+         clone les noeuds, et cloneNode copie les enfants mais pas les
+         proprietes JS de l'instance. Sans ce nettoyage on empile un second
+         canvas par-dessus un premier fige — la couche parasite visible sur
+         la vague. */
+      const orphan = this.querySelector(":scope > canvas");
+      if (orphan) orphan.remove();
       const num = (name, dflt) => {
         const v = parseFloat(this.getAttribute(name));
         return Number.isFinite(v) ? v : dflt;
@@ -213,6 +220,13 @@ void main() {
         if (ext) ext.loseContext();
       }
       this.gl = null;
+      /* Le canvas doit quitter le DOM ici. Sans ca, un re-montage (React
+         re-parente les noeuds a l'hydratation) rappelle connectedCallback,
+         qui ne voit plus this.canvas et en ajoute un second : le premier
+         reste empile, contexte WebGL detruit par loseContext(), donc fige
+         et semi-transparent — d'ou une demarcation parasite par-dessus la
+         vague, et un contexte WebGL fuite au passage. */
+      if (this.canvas && this.canvas.parentNode === this) this.removeChild(this.canvas);
       this.canvas = null;
     }
 
