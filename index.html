@@ -5,12 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="preload" as="script" href="public/vendor/react.production.min.js" />
 <link rel="preload" as="script" href="public/vendor/react-dom.production.min.js" />
+<link rel="preload" as="video" href="public/video/intro.mp4" type="video/mp4" media="(min-width: 768px)" />
 <script>
   /* Le runtime resout ses dependances via window.__resources (cf. cdnScriptFor
-     dans support.js). On les sert depuis le domaine du site au lieu d'unpkg :
-     plus de DNS/TLS tiers sur le chemin critique, et surtout plus de page
-     blanche si le CDN est lent ou injoignable. Fichiers identiques a ceux
-     d'unpkg (hash SRI verifie). */
+     dans support.js). Servies depuis le site plutot que depuis unpkg : pas de
+     DNS/TLS tiers sur le chemin critique, et pas de page blanche si le CDN
+     tombe. Fichiers identiques a ceux d'unpkg (hash SRI verifie). */
   window.__resources = {
     "https://unpkg.com/react@18.3.1/umd/react.production.min.js": "public/vendor/react.production.min.js",
     "https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js": "public/vendor/react-dom.production.min.js"
@@ -25,554 +25,483 @@
 <title>Café Concept — Restaurant &amp; Traiteur, Moissy-Cramayel</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Instrument+Sans:wght@400;500&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,600;12..96,800&family=Instrument+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
 <script src="public/vendor/lenis.min.js"></script>
+<script src="ripple-bg.js"></script>
+<script src="line-waves.js"></script>
 <style>
-  html, body { margin: 0; padding: 0; background: #241a11; }
+  html, body { margin: 0; padding: 0; background: #14100c; }
   body { font-family: "Instrument Sans", system-ui, sans-serif; color: #2e2117; -webkit-font-smoothing: antialiased; overflow-x: clip; }
   * { box-sizing: border-box; }
   a { color: #b4813f; text-decoration: none; }
-  a:hover { color: #3c2a1c; }
-  ::selection { background: #241a11; color: #fbf4ec; }
+  a:hover { color: #241a11; }
+  ::selection { background: #241a11; color: #fff3e2; }
   ::-webkit-scrollbar { width: 0; height: 0; }
   input, textarea, button { font-family: inherit; }
-  input::placeholder, textarea::placeholder { color: rgba(46,33,23,.32); }
-  @keyframes cc-grain { 0%,100% { transform: translate(0,0); } 25% { transform: translate(-2%,1%); } 50% { transform: translate(1%,-2%); } 75% { transform: translate(2%,2%); } }
-  @keyframes cc-pulse { 0%,100% { opacity: .35; transform: scale(1); } 50% { opacity: 1; transform: scale(1.45); } }
+  input::placeholder, textarea::placeholder { color: rgba(46,33,23,.3); }
+  @keyframes pulse { 0%,100% { opacity: .3; transform: scale(1); } 50% { opacity: 1; transform: scale(1.5); } }
+  @keyframes rot { to { transform: rotate(360deg); } }
+  @keyframes blobA {
+    0%,100% { border-radius: 62% 38% 54% 46% / 52% 56% 44% 48%; }
+    33% { border-radius: 41% 59% 44% 56% / 58% 43% 57% 42%; }
+    66% { border-radius: 52% 48% 38% 62% / 43% 61% 39% 57%; }
+  }
+  @keyframes blobB {
+    0%,100% { border-radius: 44% 56% 62% 38% / 46% 42% 58% 54%; }
+    33% { border-radius: 60% 40% 38% 62% / 56% 58% 42% 44%; }
+    66% { border-radius: 38% 62% 55% 45% / 62% 40% 60% 38%; }
+  }
+  @keyframes drift { 0%,100% { transform: translate3d(0,0,0) rotate(0deg); } 50% { transform: translate3d(2.5%,-3%,0) rotate(6deg); } }
 </style>
 </helmet>
 
-<div style="position: relative; background: #fbf4ec">
+<div style="position: relative; background: #fff3e2; overflow: hidden">
 
-<div class="cc-grain" style="position: fixed; inset: -50%; width: 200%; height: 200%; pointer-events: none; z-index: 90; opacity: .045; background-image: url(&quot;data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E&quot;); animation: cc-grain 8s steps(5) infinite"></div>
+<span class="prog" style="position: fixed; left: 0; top: 0; z-index: 60; display: block; width: 100%; height: 2px; transform-origin: left; transform: scaleX(0); background: #b4813f"></span>
 
-<canvas class="cc-spark" aria-hidden="true" style="position: fixed; inset: 0; z-index: 94; width: 100%; height: 100%; pointer-events: none"></canvas>
-
-<div class="cc-ring" aria-hidden="true" style="position: fixed; left: 0; top: 0; z-index: 95; width: 32px; height: 32px; margin: -16px 0 0 -16px; border: 1px solid rgba(180,129,63,.5); border-radius: 999px; pointer-events: none; opacity: 0; transition: opacity .3s ease, width .35s cubic-bezier(.16,1,.3,1), height .35s cubic-bezier(.16,1,.3,1), margin .35s cubic-bezier(.16,1,.3,1), background-color .35s ease, border-color .35s ease"></div>
-
-<div style="position: fixed; top: 0; inset-inline: 0; z-index: 80; height: 1px; background: transparent"><span class="cc-prog" style="display: block; height: 100%; width: 100%; transform-origin: left; transform: scaleX(0); background: #b4813f"></span></div>
-
-<!-- ── rail d'index ── -->
-<div class="cc-rail" style="position: fixed; left: clamp(12px, 2vw, 30px); top: 50%; transform: translateY(-50%); z-index: 72; display: grid; gap: 13px; opacity: 0; transition: opacity .6s ease">
-  <sc-for list="{{ rail }}" as="r" hint-placeholder-count="8">
-    <button class="cc-rail-item" data-target="{{ r.href }}" onClick="{{ r.go }}" aria-label="{{ r.label }}" style="display: flex; align-items: center; gap: 9px; padding: 3px 0; border: 0; background: transparent; cursor: pointer">
-      <span class="cc-rail-tick" style="display: block; width: 13px; height: 1px; background: rgba(46,33,23,.3); transition: width .4s cubic-bezier(.16,1,.3,1), background-color .4s ease"></span>
-      <span class="cc-rail-num" style="font-size: 9px; font-weight: 500; letter-spacing: .18em; color: rgba(46,33,23,.35); transition: color .4s ease">{{ r.num }}</span>
-      <span class="cc-rail-label" style="font-size: 9px; font-weight: 500; letter-spacing: .22em; text-transform: uppercase; color: rgba(46,33,23,.4); opacity: 0; transform: translateX(-5px); transition: opacity .4s ease, transform .4s cubic-bezier(.16,1,.3,1)">{{ r.label }}</span>
-    </button>
-  </sc-for>
-</div>
-
-<!-- ── navigation ── -->
-<header class="cc-nav" style="position: fixed; inset-inline: 0; top: 0; z-index: 70; display: flex; align-items: center; justify-content: space-between; gap: 28px; padding: 16px clamp(20px, 4vw, 44px); opacity: 0; pointer-events: none; transform: translateY(-24px); transition: opacity .7s cubic-bezier(.16,1,.3,1), transform .8s cubic-bezier(.16,1,.3,1), background-color .5s ease, border-color .5s ease; border-bottom: 1px solid rgba(60,42,28,0); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px)">
-  <button onClick="{{ goTop }}" aria-label="Café Concept — haut de page" style="display: flex; align-items: center; padding: 0; border: 0; background: transparent; cursor: pointer">
-    <img src="public/brand/wordmark.png" alt="Café Concept" style="display: block; height: 40px; object-fit: contain; object-position: left" />
+<!-- ── nav flottante organique ── -->
+<header class="nav" style="position: fixed; left: 50%; top: 18px; z-index: 58; display: flex; align-items: center; gap: clamp(8px, 1.4vw, 20px); padding: 9px 10px 9px 20px; border-radius: 999px; background: rgba(255,243,226,.86); -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px); box-shadow: 0 18px 44px -28px rgba(27,18,9,.5); opacity: 0; pointer-events: none; transform: translate(-50%,-22px); transition: opacity .6s cubic-bezier(.16,1,.3,1), transform .7s cubic-bezier(.16,1,.3,1)">
+  <button onClick="{{ goTop }}" aria-label="Café Concept — haut de page" style="display: flex; align-items: center; padding: 0 4px 0 0; border: 0; background: transparent; cursor: pointer">
+    <img src="public/brand/badge.png" alt="" style="display: block; width: 28px; height: 28px; object-fit: contain" />
   </button>
-  <nav aria-label="Sections" style="display: flex; align-items: center; gap: clamp(14px, 2vw, 30px)">
-    <sc-for list="{{ links }}" as="link" hint-placeholder-count="6">
-      <button class="cc-nav-link" data-target="{{ link.href }}" onClick="{{ link.go }}" style="padding: 4px 0; border: 0; border-bottom: 1px solid transparent; background: transparent; cursor: pointer; font-size: 10.5px; font-weight: 500; letter-spacing: .26em; text-transform: uppercase; color: rgba(46,33,23,.5); transition: color .3s ease, border-color .3s ease" style-hover="color: #241a11">{{ link.label }}</button>
+  <nav aria-label="Sections" style="display: flex; align-items: center; gap: clamp(6px, 1vw, 16px)">
+    <sc-for list="{{ nav }}" as="n" hint-placeholder-count="6">
+      <button class="nav-link" data-target="{{ n.href }}" onClick="{{ n.go }}" style="padding: 8px 14px; border: 0; border-radius: 999px; background: transparent; cursor: pointer; font-size: 10.5px; font-weight: 500; letter-spacing: .18em; text-transform: uppercase; color: rgba(46,33,23,.55); white-space: nowrap; transition: background-color .3s ease, color .3s ease" style-hover="background: rgba(27,18,9,.07); color: #241a11">{{ n.label }}</button>
     </sc-for>
   </nav>
-  <div style="display: flex; align-items: center; gap: 16px">
-    <span style="display: flex; align-items: center; gap: 8px; font-size: 10px; font-weight: 500; letter-spacing: .2em; text-transform: uppercase; color: rgba(46,33,23,.5)">
-      <span style="display: block; width: 5px; height: 5px; border-radius: 999px; background: {{ statusColor }}; animation: cc-pulse 2.4s ease-in-out infinite"></span>
-      {{ statusShort }}
-    </span>
-    <a class="mg" href="tel:0666028603" style="display: flex; align-items: center; gap: 9px; padding: 11px 22px; border-radius: 2px; background: #241a11; font-size: 10.5px; font-weight: 500; letter-spacing: .22em; text-transform: uppercase; color: #fbf4ec; white-space: nowrap; transition: background-color .35s ease, transform .4s cubic-bezier(.16,1,.3,1)" style-hover="background: #b4813f; color: #fbf4ec">06 66 02 86 03</a>
-  </div>
+  <a href="tel:0666028603" style="display: flex; align-items: center; gap: 8px; padding: 11px 20px; border-radius: 999px; background: #1b1209; font-size: 10.5px; font-weight: 500; letter-spacing: .18em; text-transform: uppercase; color: #fff3e2; white-space: nowrap; transition: background-color .35s ease" style-hover="background: #b4813f; color: #fff3e2">Appeler</a>
 </header>
 
-<main>
-<!-- ── 00 · Film scrubé ── -->
-<section id="film" class="cc-film" data-screen-label="Film" style="position: relative; height: 380vh; background: #241a11">
-  <div style="position: sticky; top: 0; height: 100vh; overflow: hidden; background: #241a11">
+<!-- piste de scroll du film : rien dedans, elle ne sert qu'à mesurer -->
+<section id="film" class="film" data-screen-label="Film" style="height: 320vh"></section>
 
-    <div class="cc-frame" style="position: absolute; inset: 0; overflow: hidden; will-change: clip-path">
-      <div class="cc-media" style="position: absolute; inset: 0; will-change: transform; transform: translateZ(0); backface-visibility: hidden">
-        <img src="analysis/vidframes/f_0.jpg" alt="" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 1" />
-        <img src="analysis/vidframes/f_1.5.jpg" alt="" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0" />
-        <img src="analysis/vidframes/f_3.jpg" alt="" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0" />
-        <img src="analysis/vidframes/f_4.5.jpg" alt="" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0" />
-        <img src="analysis/vidframes/f_6.jpg" alt="" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0" />
-        <img src="analysis/vidframes/f_7.5.jpg" alt="" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0" />
-        <img src="analysis/vidframes/f_9.jpg" alt="" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0" />
-        <img src="analysis/vidframes/f_9.9.jpg" alt="" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0" />
-        <video class="cc-video" muted="" playsinline="" preload="auto" aria-hidden="true" poster="public/video/intro-poster.jpg" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity .7s ease">
-          <source src="public/video/intro-540.mp4" media="(max-width: 767px)" type="video/mp4" />
-          <source src="public/video/intro.mp4" type="video/mp4" />
-        </video>
+<!-- ══ 00 · ENTRÉE ══ -->
+<section id="entree" data-screen-label="Entrée" style="position: relative; margin-top: -100vh; padding: clamp(18px, 3vh, 34px) clamp(20px, 4vw, 60px) clamp(70px, 12vh, 140px)">
+  <div aria-hidden="true" class="blob" style="position: absolute; left: -14vw; top: 18vh; width: 46vw; height: 46vw; background: radial-gradient(circle at 34% 30%, #f6dcb8, #edc99a); opacity: .5; filter: blur(4px); animation: blobA 19s ease-in-out infinite, drift 26s ease-in-out infinite"></div>
+  <div aria-hidden="true" class="blob" style="position: absolute; right: -18vw; top: 52vh; width: 40vw; height: 40vw; background: radial-gradient(circle at 60% 40%, #e8cfae, #d9b98d); opacity: .38; filter: blur(6px); animation: blobB 23s ease-in-out infinite, drift 31s ease-in-out infinite reverse"></div>
+
+  <!-- l'écran du portable : cible de l'atterrissage -->
+  <div class="mac" style="position: relative; z-index: 2; width: 100%; max-width: 1120px; margin: 0 auto; opacity: 0; transition: opacity .5s ease">
+    <div style="position: relative; padding: 1.5% 1.5% 1.9%; border-radius: 24px; background: linear-gradient(168deg, #4d4d51, #232326 46%, #16161a); box-shadow: 0 50px 100px -54px rgba(27,18,9,.62), inset 0 1px rgba(255,255,255,.22)">
+      <div class="slot" style="position: relative; aspect-ratio: 16 / 9; overflow: hidden; border-radius: 13px; background: #0d0906"></div>
+      <span aria-hidden="true" style="position: absolute; left: 50%; top: 1.5%; transform: translateX(-50%); width: 13%; height: 15px; border-radius: 0 0 9px 9px; background: #16161a"></span>
+    </div>
+    <div aria-hidden="true" style="position: relative; left: -4.6%; width: 109.2%; height: 15px; border-radius: 0 0 16px 16px; background: linear-gradient(180deg, #35353a, #1c1c1f 62%, #101012); box-shadow: 0 26px 44px -28px rgba(27,18,9,.55)">
+      <span style="position: absolute; left: 50%; top: 0; transform: translateX(-50%); width: 15%; height: 5px; border-radius: 0 0 6px 6px; background: rgba(0,0,0,.5)"></span>
+    </div>
+  </div>
+
+  <!-- titre décalé, non centré -->
+  <div style="position: relative; z-index: 2; margin-top: clamp(44px, 8vh, 100px)">
+    <p class="rv" style="margin: 0 0 clamp(12px, 2vh, 22px) clamp(0px, 4vw, 70px); font-size: 10px; font-weight: 500; letter-spacing: .3em; text-transform: uppercase; color: #b4813f">Restaurant &amp; traiteur — Moissy-Cramayel</p>
+    <h1 class="tp" style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(3.2rem, 12vw, 11.5rem); line-height: .82; letter-spacing: -.055em; color: #1b1209">
+      <span style="display: block; overflow: hidden; padding-top: .14em; margin-top: -.14em; margin-left: clamp(0px, 4vw, 70px)"><span class="wd" style="display: block">CAFÉ</span></span>
+      <span style="display: block; overflow: hidden; padding-top: .14em; margin-top: -.14em; margin-left: clamp(0px, 12vw, 210px)"><span class="wd" style="display: block">CONCEPT</span></span>
+    </h1>
+
+    <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: clamp(24px, 4vw, 70px); flex-wrap: wrap; margin-top: clamp(26px, 4vh, 48px)">
+      <!-- galet « en ce moment » -->
+      <div class="rv" style="display: flex; align-items: center; gap: 14px; padding: 12px 22px 12px 12px; border-radius: 999px; background: #1b1209; color: #fff3e2">
+        <div style="position: relative; flex-shrink: 0; width: 46px; height: 46px; overflow: hidden; border-radius: 999px; background: #3c2a1c">
+          <img class="now-img" src="public/food/latte.png" alt="" style="width: 100%; height: 100%; object-fit: cover" />
+        </div>
+        <div>
+          <p style="margin: 0; display: flex; align-items: center; gap: 7px; font-size: 9px; font-weight: 500; letter-spacing: .24em; text-transform: uppercase; color: rgba(217,168,104,.85)">
+            <span style="display: block; width: 5px; height: 5px; border-radius: 999px; background: {{ statusColor }}; animation: pulse 2.4s ease-in-out infinite"></span>
+            {{ statusShort }}
+          </p>
+          <p style="margin: 4px 0 0; font-family: 'Bricolage Grotesque', sans-serif; font-size: 16px; font-weight: 600; letter-spacing: -.02em; color: #fff3e2">{{ nowTitle }}</p>
+        </div>
+        <span class="clock" style="margin-left: 8px; font-family: 'Bricolage Grotesque', sans-serif; font-size: 15px; font-weight: 600; letter-spacing: .04em; color: rgba(255,243,226,.5)">--:--</span>
       </div>
-      <div style="position: absolute; inset: 0; background: radial-gradient(120% 90% at 50% 38%, rgba(36,26,17,0) 38%, rgba(36,26,17,.66) 100%)"></div>
-      <div style="position: absolute; inset-inline: 0; bottom: 0; height: 44%; background: linear-gradient(to top, rgba(36,26,17,.88), rgba(36,26,17,0))"></div>
-      <!-- flou progressif (façon GradualBlur) -->
-      <div aria-hidden="true" style="position: absolute; inset-inline: 0; bottom: 0; height: 34px; -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px)"></div>
-      <div aria-hidden="true" style="position: absolute; inset-inline: 0; bottom: 0; height: 22px; -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px)"></div>
-      <div aria-hidden="true" style="position: absolute; inset-inline: 0; bottom: 0; height: 11px; -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px)"></div>
-    </div>
-
-    <div style="position: absolute; inset: 0; display: flex; align-items: center; padding: 0 clamp(56px, 8vw, 150px); pointer-events: none">
-      <div style="position: relative; width: 100%; max-width: 1180px; margin: 0 auto">
-        <div class="cc-ch" style="opacity: 1">
-          <img src="public/brand/wordmark-cream.png" alt="Café Concept" style="display: block; width: clamp(180px, 20vw, 260px); margin-bottom: 30px; object-fit: contain" />
-          <p style="margin: 0 0 20px; font-size: 10.5px; font-weight: 500; letter-spacing: .3em; text-transform: uppercase; color: rgba(217,168,104,.9)">Moissy-Cramayel — depuis le premier café</p>
-          <h1 style="margin: 0; font-family: 'Instrument Serif', serif; font-weight: 400; font-size: clamp(3rem, 7.6vw, 8rem); line-height: .92; letter-spacing: -.025em; color: #fbf4ec">Tout commence<br /><span style="font-style: italic; color: #d9a868">à 8h30</span></h1>
-        </div>
-        <div class="cc-ch" style="position: absolute; inset: 0; opacity: 0">
-          <p style="margin: 0 0 22px; font-size: 10.5px; font-weight: 500; letter-spacing: .3em; text-transform: uppercase; color: rgba(217,168,104,.9)">Café · caramel · épices</p>
-          <h2 style="margin: 0; font-family: 'Instrument Serif', serif; font-weight: 400; font-size: clamp(3.2rem, 8.4vw, 9rem); line-height: .92; letter-spacing: -.025em; color: #fbf4ec">Un tourbillon<br /><span style="font-style: italic; color: #d9a868">de saveurs</span></h2>
-        </div>
-        <div class="cc-ch" style="position: absolute; inset: 0; opacity: 0">
-          <p style="margin: 0 0 22px; font-size: 10.5px; font-weight: 500; letter-spacing: .3em; text-transform: uppercase; color: rgba(217,168,104,.9)">Asie · burgers · pâtisseries</p>
-          <h2 style="margin: 0; font-family: 'Instrument Serif', serif; font-weight: 400; font-size: clamp(3.2rem, 8.4vw, 9rem); line-height: .92; letter-spacing: -.025em; color: #fbf4ec">De la tasse<br /><span style="font-style: italic; color: #d9a868">au bol</span></h2>
-        </div>
-      </div>
-    </div>
-
-    <div style="position: absolute; right: clamp(20px, 4vw, 46px); top: 50%; transform: translateY(-50%); display: flex; align-items: center; gap: 16px; pointer-events: none">
-      <span style="font-size: 10px; font-weight: 500; letter-spacing: .22em; color: rgba(251,244,236,.55)"><span class="cc-count">01</span> / 03</span>
-      <span style="position: relative; display: block; width: 1px; height: 32vh; background: rgba(251,244,236,.16)"><span class="cc-scrub" style="position: absolute; inset: 0; transform-origin: top; transform: scaleY(0); background: #d9a868"></span></span>
-    </div>
-
-    <div class="cc-cue" style="position: absolute; left: 50%; bottom: 34px; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 10px; pointer-events: none; transition: opacity .5s ease">
-      <span style="font-size: 9.5px; font-weight: 500; letter-spacing: .34em; text-transform: uppercase; color: rgba(251,244,236,.42)">défilez</span>
-      <span style="display: block; width: 1px; height: 46px; background: linear-gradient(to bottom, rgba(251,244,236,.5), rgba(251,244,236,0))"></span>
+      <p class="rv" style="margin: 0; max-width: 28rem; font-size: 15.5px; line-height: 1.75; color: #6b5847; text-wrap: pretty">Le vrai goût du fait-maison. Cuisine asiatique, burgers smashés, viennoiseries du matin — tout est préparé sur place, chaque jour.</p>
     </div>
   </div>
 </section>
 
-<!-- ── 01 · Manifeste ── -->
-<section id="maison" data-screen-label="Maison" style="position: relative; background: #fbf4ec; padding: clamp(90px, 14vh, 170px) clamp(56px, 8vw, 150px) clamp(80px, 12vh, 140px)">
-  <div style="max-width: 1320px; margin: 0 auto">
-    <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 40px; padding-bottom: 26px; border-bottom: 1px solid rgba(60,42,28,.16)">
-      <p class="rv" style="margin: 0; font-size: 10.5px; font-weight: 500; letter-spacing: .3em; text-transform: uppercase; color: #b4813f">01 — La maison</p>
-      <p class="rv" style="margin: 0; font-size: 10.5px; font-weight: 500; letter-spacing: .3em; text-transform: uppercase; color: rgba(46,33,23,.45)">Restaurant &amp; traiteur</p>
-    </div>
+<!-- ══ 01 · LA MAISON ══
+     Le bloc espresso EST la vague : les bords ondulés sont découpés au masque,
+     donc la surface liquide couvre aussi le débord du haut et du bas. -->
+<div style="position: relative; -webkit-mask-image: url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 1440 150%22 preserveAspectRatio=%22none%22%3E%3Cpath d=%22M0,96 C220,150 340,10 620,44 C880,76 1010,142 1230,120 C1330,110 1390,80 1440,58 L1440,150 L0,150 Z%22 fill=%22%23fff%22/%3E%3C/svg%3E'), linear-gradient(#000, #000), url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 1440 150%22 preserveAspectRatio=%22none%22%3E%3Cpath d=%22M0,0 L1440,0 L1440,52 C1210,18 1090,128 830,104 C600,84 470,4 250,30 C150,42 60,66 0,88 Z%22 fill=%22%23fff%22/%3E%3C/svg%3E'); mask-image: url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 1440 150%22 preserveAspectRatio=%22none%22%3E%3Cpath d=%22M0,96 C220,150 340,10 620,44 C880,76 1010,142 1230,120 C1330,110 1390,80 1440,58 L1440,150 L0,150 Z%22 fill=%22%23fff%22/%3E%3C/svg%3E'), linear-gradient(#000, #000), url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 1440 150%22 preserveAspectRatio=%22none%22%3E%3Cpath d=%22M0,0 L1440,0 L1440,52 C1210,18 1090,128 830,104 C600,84 470,4 250,30 C150,42 60,66 0,88 Z%22 fill=%22%23fff%22/%3E%3C/svg%3E'); -webkit-mask-size: 100% clamp(60px, 9vw, 130px), 100% calc(100% - 2 * clamp(60px, 9vw, 130px)), 100% clamp(60px, 9vw, 130px); mask-size: 100% clamp(60px, 9vw, 130px), 100% calc(100% - 2 * clamp(60px, 9vw, 130px)), 100% clamp(60px, 9vw, 130px); -webkit-mask-position: 0 0, 0 clamp(60px, 9vw, 130px), 0 100%; mask-position: 0 0, 0 clamp(60px, 9vw, 130px), 0 100%; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat">
+<section id="maison" data-screen-label="Maison" style="position: relative; padding: clamp(80px, 12vw, 165px) clamp(20px, 4vw, 60px) clamp(110px, 15vw, 210px); background: #1b1209; color: #fff3e2; overflow: hidden">
+  <ripple-bg aria-hidden="true" base="#1b1209" accent="#b4813f" highlight="#d9a868" style="position: absolute; inset: 0; z-index: 0"></ripple-bg>
 
-    <h2 style="display: flex; flex-wrap: wrap; gap: 0 .24em; margin: clamp(40px, 7vh, 80px) 0 0; font-family: 'Instrument Serif', serif; font-weight: 400; font-size: clamp(2.8rem, 7.2vw, 7.6rem); line-height: .98; letter-spacing: -.03em; color: #241a11">
-      <span style="display: block; overflow: hidden; padding-bottom: .04em"><span class="wd" style="display: block">Le</span></span>
-      <span style="display: block; overflow: hidden; padding-bottom: .04em"><span class="wd" style="display: block">vrai</span></span>
-      <span style="display: block; overflow: hidden; padding-bottom: .04em"><span class="wd" style="display: block">goût</span></span>
-      <span style="display: block; overflow: hidden; padding-bottom: .04em"><span class="wd" style="display: block">du</span></span>
-      <span style="display: block; overflow: hidden; padding-bottom: .04em"><span class="wd" style="display: block; font-style: italic; color: #b4813f">fait-maison</span></span>
-      <span style="display: block; overflow: hidden; padding-bottom: .04em"><span class="wd" style="display: block">—</span></span>
-      <span style="display: block; overflow: hidden; padding-bottom: .04em"><span class="wd" style="display: block">chaque</span></span>
-      <span style="display: block; overflow: hidden; padding-bottom: .04em"><span class="wd" style="display: block">matin,</span></span>
-      <span style="display: block; overflow: hidden; padding-bottom: .04em"><span class="wd" style="display: block">sur</span></span>
-      <span style="display: block; overflow: hidden; padding-bottom: .04em"><span class="wd" style="display: block">place.</span></span>
-    </h2>
-
-    <div style="display: grid; grid-template-columns: 1.15fr .85fr; align-items: end; gap: clamp(40px, 6vw, 100px); margin-top: clamp(48px, 8vh, 96px)">
-      <div>
-        <p class="rv" style="margin: 0; max-width: 34rem; font-size: 17px; line-height: 1.75; color: #6b5847; text-wrap: pretty">Saveurs asiatiques, burgers smashés, salades fraîches et viennoiseries sorties du four. Tout est préparé ici, à la commande, avec des produits choisis le matin même — rien d'industriel, rien de réchauffé.</p>
-        <div class="rv" style="display: flex; flex-wrap: wrap; gap: 12px; margin-top: 40px">
-          <button class="mg" onClick="{{ goCarte }}" style="display: flex; align-items: center; gap: 14px; padding: 17px 30px; border: 0; border-radius: 2px; background: #241a11; cursor: pointer; font-size: 11px; font-weight: 500; letter-spacing: .24em; text-transform: uppercase; color: #fbf4ec; transition: background-color .35s ease, transform .4s cubic-bezier(.16,1,.3,1)" style-hover="background: #b4813f">Voir la carte
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
-          </button>
-          <button class="mg" onClick="{{ goTraiteur }}" style="padding: 17px 30px; border: 1px solid rgba(60,42,28,.25); border-radius: 2px; background: transparent; cursor: pointer; font-size: 11px; font-weight: 500; letter-spacing: .24em; text-transform: uppercase; color: #241a11; transition: border-color .35s ease, color .35s ease, transform .4s cubic-bezier(.16,1,.3,1)" style-hover="border-color: #b4813f; color: #b4813f">Service traiteur</button>
-        </div>
-        <dl class="rv" style="display: grid; grid-template-columns: repeat(3, auto); justify-content: start; gap: 0 clamp(30px, 5vw, 72px); margin: clamp(48px, 8vh, 88px) 0 0; padding-top: 26px; border-top: 1px solid rgba(60,42,28,.16)">
-          <sc-for list="{{ stats }}" as="s" hint-placeholder-count="3">
-            <div>
-              <dd class="cc-num" data-to="{{ s.to }}" data-suffix="{{ s.suffix }}" data-dec="{{ s.dec }}" style="margin: 0; font-family: 'Instrument Serif', serif; font-size: clamp(2.4rem, 3.6vw, 3.4rem); line-height: 1; color: #241a11">{{ s.value }}</dd>
-              <dt style="margin-top: 10px; font-size: 10px; font-weight: 500; letter-spacing: .26em; text-transform: uppercase; color: rgba(46,33,23,.5)">{{ s.label }}</dt>
-            </div>
-          </sc-for>
-        </dl>
-      </div>
-
-      <figure class="rv" style="position: relative; margin: 0">
-        <div class="cc-portrait" style="position: relative; aspect-ratio: 3 / 4; overflow: hidden; border-radius: 999px 999px 2px 2px">
-          <img src="public/food/cafe-interior.png" alt="La salle du Café Concept à Moissy-Cramayel" style="width: 100%; height: 100%; object-fit: cover; transform: scale(1.08)" />
-        </div>
-        <!-- sceau circulaire tournant (façon CircularText) -->
-        <div class="cc-seal" aria-hidden="true" style="position: absolute; left: -46px; bottom: 42px; width: 132px; height: 132px; border-radius: 999px; background: #241a11; will-change: transform">
-          <span style="position: absolute; inset: 0; transform: rotate(0deg)"><span style="position: absolute; left: 50%; top: 9px; transform: translateX(-50%); font-size: 9.5px; font-weight: 500; letter-spacing: 0; color: #d9a868">·</span></span>
-          <span style="position: absolute; inset: 0; transform: rotate(15deg)"><span style="position: absolute; left: 50%; top: 9px; transform: translateX(-50%); font-size: 9.5px; font-weight: 500; color: #fbf4ec">F</span></span>
-          <span style="position: absolute; inset: 0; transform: rotate(30deg)"><span style="position: absolute; left: 50%; top: 9px; transform: translateX(-50%); font-size: 9.5px; font-weight: 500; color: #fbf4ec">A</span></span>
-          <span style="position: absolute; inset: 0; transform: rotate(45deg)"><span style="position: absolute; left: 50%; top: 9px; transform: translateX(-50%); font-size: 9.5px; font-weight: 500; color: #fbf4ec">I</span></span>
-          <span style="position: absolute; inset: 0; transform: rotate(60deg)"><span style="position: absolute; left: 50%; top: 9px; transform: translateX(-50%); font-size: 9.5px; font-weight: 500; color: #fbf4ec">T</span></span>
-          <span style="position: absolute; inset: 0; transform: rotate(90deg)"><span style="position: absolute; left: 50%; top: 9px; transform: translateX(-50%); font-size: 9.5px; font-weight: 500; color: #fbf4ec">M</span></span>
-          <span style="position: absolute; inset: 0; transform: rotate(105deg)"><span style="position: absolute; left: 50%; top: 9px; transform: translateX(-50%); font-size: 9.5px; font-weight: 500; color: #fbf4ec">A</span></span>
-          <span style="position: absolute; inset: 0; transform: rotate(120deg)"><span style="position: absolute; left: 50%; top: 9px; transform: translateX(-50%); font-size: 9.5px; font-weight: 500; color: #fbf4ec">I</span></span>
-          <span style="position: absolute; inset: 0; transform: rotate(135deg)"><span style="position: absolute; left: 50%; top: 9px; transform: translateX(-50%); font-size: 9.5px; font-weight: 500; color: #fbf4ec">S</span></span>
-          <span style="position: absolute; inset: 0; transform: rotate(150deg)"><span style="position: absolute; left: 50%; top: 9px; transform: translateX(-50%); font-size: 9.5px; font-weight: 500; color: #fbf4ec">O</span></span>
-          <span style="position: absolute; inset: 0; transform: rotate(165deg)"><span style="position: absolute; left: 50%; top: 9px; transform: translateX(-50%); font-size: 9.5px; font-weight: 500; color: #fbf4ec">N</span></span>
-          <span style="position: absolute; inset: 0; transform: rotate(180deg)"><span style="position: absolute; left: 50%; top: 9px; transform: translateX(-50%); font-size: 9.5px; font-weight: 500; color: #d9a868">·</span></span>
-          <span style="position: absolute; inset: 0; transform: rotate(195deg)"><span style="position: absolute; left: 50%; top: 9px; transform: translateX(-50%); font-size: 9.5px; font-weight: 500; color: #fbf4ec">S</span></span>
-          <span style="position: absolute; inset: 0; transform: rotate(210deg)"><span style="position: absolute; left: 50%; top: 9px; transform: translateX(-50%); font-size: 9.5px; font-weight: 500; color: #fbf4ec">U</span></span>
-          <span style="position: absolute; inset: 0; transform: rotate(225deg)"><span style="position: absolute; left: 50%; top: 9px; transform: translateX(-50%); font-size: 9.5px; font-weight: 500; color: #fbf4ec">R</span></span>
-          <span style="position: absolute; inset: 0; transform: rotate(255deg)"><span style="position: absolute; left: 50%; top: 9px; transform: translateX(-50%); font-size: 9.5px; font-weight: 500; color: #fbf4ec">P</span></span>
-          <span style="position: absolute; inset: 0; transform: rotate(270deg)"><span style="position: absolute; left: 50%; top: 9px; transform: translateX(-50%); font-size: 9.5px; font-weight: 500; color: #fbf4ec">L</span></span>
-          <span style="position: absolute; inset: 0; transform: rotate(285deg)"><span style="position: absolute; left: 50%; top: 9px; transform: translateX(-50%); font-size: 9.5px; font-weight: 500; color: #fbf4ec">A</span></span>
-          <span style="position: absolute; inset: 0; transform: rotate(300deg)"><span style="position: absolute; left: 50%; top: 9px; transform: translateX(-50%); font-size: 9.5px; font-weight: 500; color: #fbf4ec">C</span></span>
-          <span style="position: absolute; inset: 0; transform: rotate(315deg)"><span style="position: absolute; left: 50%; top: 9px; transform: translateX(-50%); font-size: 9.5px; font-weight: 500; color: #fbf4ec">E</span></span>
-          <img src="public/brand/badge-cream.png" alt="" style="position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); width: 52px; height: 52px; object-fit: contain" />
-        </div>
-        <figcaption style="display: flex; align-items: baseline; justify-content: space-between; gap: 20px; margin-top: 16px; font-size: 10.5px; font-weight: 500; letter-spacing: .2em; text-transform: uppercase; color: rgba(46,33,23,.45)"><span>502 av. des Meuniers</span><span>77550</span></figcaption>
-      </figure>
-    </div>
+  <div style="position: relative; z-index: 2; display: flex; align-items: baseline; justify-content: space-between; gap: 26px; flex-wrap: wrap">
+    <p style="margin: 0; font-size: 10px; font-weight: 500; letter-spacing: .3em; text-transform: uppercase; color: rgba(217,168,104,.85)">01 — La maison</p>
+    <p style="margin: 0; font-size: 10px; font-weight: 500; letter-spacing: .3em; text-transform: uppercase; color: rgba(255,243,226,.32)">Depuis le premier café</p>
   </div>
-</section>
 
-<!-- ── bandes défilantes pilotées par la vélocité du scroll ── -->
-<section aria-hidden="true" style="position: relative; border-top: 1px solid rgba(60,42,28,.14); border-bottom: 1px solid rgba(60,42,28,.14); background: #f6e9db; overflow: hidden">
-  <div style="padding: 18px 0; overflow: hidden">
-    <div class="cc-mq" data-dir="-1" style="display: flex; width: max-content; align-items: center; gap: 56px; will-change: transform">
-      <sc-for list="{{ marquee }}" as="word" hint-placeholder-count="18">
-        <span style="white-space: nowrap; font-family: 'Instrument Serif', serif; font-size: clamp(1.5rem, 2.4vw, 2.3rem); letter-spacing: -.02em; color: rgba(60,42,28,.85)">{{ word }}</span>
-      </sc-for>
-    </div>
-  </div>
-  <div style="padding: 0 0 18px; overflow: hidden">
-    <div class="cc-mq" data-dir="1" style="display: flex; width: max-content; align-items: center; gap: 44px; will-change: transform">
-      <sc-for list="{{ marqueeB }}" as="word" hint-placeholder-count="18">
-        <span style="white-space: nowrap; font-size: 10.5px; font-weight: 500; letter-spacing: .3em; text-transform: uppercase; color: rgba(90,63,41,.5)">{{ word }}</span>
-      </sc-for>
-    </div>
-  </div>
-</section>
+  <div style="position: relative; z-index: 2; display: grid; grid-template-columns: 1.2fr .8fr; gap: clamp(30px, 5vw, 84px); margin-top: clamp(30px, 5vh, 64px); align-items: center">
+    <div>
+      <h2 class="sf" style="margin: 0; max-width: 30rem; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 400; font-size: clamp(1.7rem, 3.6vw, 3.5rem); line-height: 1.08; letter-spacing: -.035em; color: #fff3e2; text-wrap: pretty">Une cuisine ouverte, des produits choisis le matin, et zéro raccourci.</h2>
+      <p class="rv" style="margin: 24px 0 0; max-width: 33rem; font-size: 16px; line-height: 1.8; color: rgba(255,243,226,.55); text-wrap: pretty">Bo buns, burgers smashés à la minute, salades composées, viennoiseries pur beurre sorties du four : la carte est large parce que la cuisine tourne toute la journée. Rien n'attend sous une lampe.</p>
 
-<!-- ── 02 · Le rituel ── -->
-<section id="rituel" class="cc-rit" data-screen-label="Rituel" style="position: relative; height: 300vh; background: #fbf4ec">
-  <div style="position: sticky; top: 0; height: 100vh; overflow: hidden; display: grid; grid-template-columns: 1fr 1fr">
-    <div style="position: relative; display: flex; flex-direction: column; justify-content: center; padding: 0 clamp(56px, 8vw, 150px); background: #fbf4ec">
-      <p style="margin: 0 0 auto; padding-top: clamp(28px, 5vh, 54px); font-size: 10.5px; font-weight: 500; letter-spacing: .3em; text-transform: uppercase; color: #b4813f">02 — Le rituel</p>
-      <div style="position: relative; padding: clamp(16px, 4vh, 48px) 0">
-        <sc-for list="{{ moments }}" as="m" hint-placeholder-count="3">
-          <div class="cc-mom" style="opacity: 0">
-            <p style="margin: 0; font-family: 'Instrument Serif', serif; font-size: clamp(3.4rem, 8vw, 8rem); line-height: .86; letter-spacing: -.04em; color: #241a11">{{ m.time }}</p>
-            <h3 style="margin: 24px 0 0; max-width: 22rem; font-family: 'Instrument Serif', serif; font-weight: 400; font-size: clamp(1.4rem, 2.2vw, 2rem); line-height: 1.15; letter-spacing: -.02em; color: #241a11">{{ m.title }}</h3>
-            <p style="margin: 14px 0 0; max-width: 24rem; font-size: 15px; line-height: 1.75; color: #6b5847">{{ m.text }}</p>
+      <dl class="rv" style="display: flex; flex-wrap: wrap; gap: 10px; margin: clamp(30px, 5vh, 54px) 0 0">
+        <sc-for list="{{ stats }}" as="s" hint-placeholder-count="3">
+          <div style="display: flex; align-items: baseline; gap: 11px; padding: 13px 24px; border-radius: 999px; background: rgba(255,243,226,.07)">
+            <dd class="num" data-to="{{ s.to }}" data-suffix="{{ s.suffix }}" data-dec="{{ s.dec }}" style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(1.4rem, 2.2vw, 2rem); line-height: 1; letter-spacing: -.045em; color: #fff3e2">{{ s.value }}</dd>
+            <dt style="font-size: 9.5px; font-weight: 500; letter-spacing: .22em; text-transform: uppercase; color: rgba(255,243,226,.45)">{{ s.label }}</dt>
           </div>
         </sc-for>
-      </div>
-      <div style="display: flex; align-items: center; gap: 14px; margin-bottom: clamp(28px, 5vh, 54px)">
-        <span style="font-size: 10px; font-weight: 500; letter-spacing: .22em; color: rgba(46,33,23,.4)"><span class="cc-mom-n">01</span> / 03</span>
-        <span style="position: relative; display: block; width: clamp(80px, 12vw, 160px); height: 1px; background: rgba(60,42,28,.18)"><span class="cc-mom-bar" style="position: absolute; inset: 0; transform-origin: left; transform: scaleX(0); background: #b4813f"></span></span>
-      </div>
-    </div>
-    <div style="position: relative; overflow: hidden; background: #241a11">
-      <sc-for list="{{ moments }}" as="m" hint-placeholder-count="3">
-        <div class="cc-mom-img" style="position: absolute; inset: 0; opacity: 0; will-change: transform, opacity">
-          <img src="{{ m.image }}" alt="{{ m.title }}" style="width: 100%; height: 100%; object-fit: cover" />
-          <div style="position: absolute; inset: 0; background: linear-gradient(to right, rgba(36,26,17,.34), rgba(36,26,17,0) 40%)"></div>
-        </div>
-      </sc-for>
-    </div>
-  </div>
-</section>
+      </dl>
 
-<!-- ── 03 · Signatures ── -->
-<section id="signatures" class="cc-sig" data-screen-label="Signatures" style="position: relative; height: 440vh; background: #241a11">
-  <div style="position: sticky; top: 0; height: 100vh; overflow: hidden; display: flex; flex-direction: column">
-    <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 40px; padding: clamp(28px, 5vh, 54px) clamp(56px, 8vw, 150px) 0">
-      <p style="margin: 0; font-size: 10.5px; font-weight: 500; letter-spacing: .3em; text-transform: uppercase; color: rgba(217,168,104,.85)">03 — Signatures</p>
-      <p style="margin: 0; font-size: 10.5px; font-weight: 500; letter-spacing: .3em; text-transform: uppercase; color: rgba(251,244,236,.35)"><span class="cc-sig-n">01</span> / 05</p>
-    </div>
-    <h2 style="margin: clamp(14px, 3vh, 26px) 0 0; padding: 0 clamp(56px, 8vw, 150px); font-family: 'Instrument Serif', serif; font-weight: 400; font-size: clamp(2.2rem, 4.6vw, 4.2rem); line-height: 1; letter-spacing: -.028em; color: #fbf4ec">Les assiettes qui font <span style="font-style: italic; color: #d9a868">la réputation</span></h2>
-
-    <div class="cc-viewport" style="flex: 1; display: flex; align-items: center; overflow: hidden; margin-top: clamp(10px, 2vh, 24px); cursor: grab">
-      <div class="cc-track" style="display: flex; width: max-content; align-items: stretch; gap: clamp(28px, 4vw, 68px); padding: 0 clamp(56px, 8vw, 150px); will-change: transform">
-        <sc-for list="{{ signatures }}" as="dish" hint-placeholder-count="5">
-          <article class="cc-card" style="display: flex; flex-direction: column; width: clamp(240px, 24vw, 350px); flex-shrink: 0">
-            <div class="cc-sig-img" style="position: relative; aspect-ratio: 4 / 5; overflow: hidden; border-radius: 2px; background: #3c2a1c">
-              <img src="{{ dish.image }}" alt="{{ dish.name }}" style="width: 100%; height: 100%; object-fit: cover; will-change: transform" />
-              <span style="position: absolute; left: 0; top: 0; padding: 12px 14px; font-size: 10px; font-weight: 500; letter-spacing: .24em; text-transform: uppercase; color: rgba(251,244,236,.85)">{{ dish.index }}</span>
-            </div>
-            <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 20px; margin-top: 22px; padding-bottom: 14px; border-bottom: 1px solid rgba(251,244,236,.16)">
-              <h3 style="margin: 0; font-family: 'Instrument Serif', serif; font-weight: 400; font-size: clamp(1.35rem, 1.8vw, 1.9rem); line-height: 1.05; letter-spacing: -.02em; color: #fbf4ec">{{ dish.name }}</h3>
-              <span style="flex-shrink: 0; font-size: 12px; font-weight: 500; letter-spacing: .12em; color: #d9a868">{{ dish.price }}</span>
-            </div>
-            <p style="margin: 14px 0 0; font-size: 14px; line-height: 1.65; color: rgba(251,244,236,.5)">{{ dish.desc }}</p>
-            <p style="margin: 14px 0 0; font-size: 9.5px; font-weight: 500; letter-spacing: .26em; text-transform: uppercase; color: rgba(217,168,104,.65)">{{ dish.tag }}</p>
-          </article>
-        </sc-for>
-        <div style="display: flex; flex-direction: column; justify-content: center; width: clamp(260px, 26vw, 400px); flex-shrink: 0">
-          <img src="public/brand/wordmark-cream.png" alt="Café Concept" style="display: block; width: 180px; margin-bottom: 26px; object-fit: contain; opacity: .9" />
-          <p style="margin: 0; font-family: 'Instrument Serif', serif; font-size: clamp(1.8rem, 2.8vw, 2.8rem); line-height: 1.05; letter-spacing: -.025em; color: #fbf4ec">Et 70 autres<br /><span style="font-style: italic; color: #d9a868">gourmandises.</span></p>
-          <button class="mg" onClick="{{ goCarte }}" style="margin-top: 30px; align-self: flex-start; padding: 16px 28px; border: 1px solid rgba(251,244,236,.24); border-radius: 2px; background: transparent; cursor: pointer; font-size: 10.5px; font-weight: 500; letter-spacing: .24em; text-transform: uppercase; color: #fbf4ec; transition: border-color .35s ease, color .35s ease, transform .4s cubic-bezier(.16,1,.3,1)" style-hover="border-color: #d9a868; color: #d9a868">Toute la carte</button>
-        </div>
-      </div>
-    </div>
-
-    <div style="display: flex; align-items: center; gap: 20px; padding: 0 clamp(56px, 8vw, 150px) clamp(28px, 5vh, 54px)">
-      <span style="flex-shrink: 0; font-size: 9.5px; font-weight: 500; letter-spacing: .28em; text-transform: uppercase; color: rgba(251,244,236,.3)">glissez ou défilez</span>
-      <div style="flex: 1; height: 1px; background: rgba(251,244,236,.16)"><span class="cc-sig-bar" style="display: block; height: 100%; width: 100%; transform-origin: left; transform: scaleX(0); background: #d9a868"></span></div>
-    </div>
-  </div>
-</section>
-
-<!-- ── 04 · Carte ── -->
-<section id="carte" data-screen-label="Carte" style="position: relative; background: #fbf4ec; padding: clamp(90px, 14vh, 160px) clamp(56px, 8vw, 150px)">
-  <div style="max-width: 1320px; margin: 0 auto">
-    <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 40px; padding-bottom: 26px; border-bottom: 1px solid rgba(60,42,28,.16)">
-      <p class="rv" style="margin: 0; font-size: 10.5px; font-weight: 500; letter-spacing: .3em; text-transform: uppercase; color: #b4813f">04 — La carte</p>
-      <p class="rv" style="margin: 0; font-size: 10.5px; font-weight: 500; letter-spacing: .3em; text-transform: uppercase; color: rgba(46,33,23,.45)">Sur place ou à emporter</p>
-    </div>
-
-    <div style="display: grid; grid-template-columns: 260px 1fr; gap: clamp(36px, 6vw, 90px); margin-top: clamp(40px, 7vh, 76px); align-items: start">
-      <div style="position: sticky; top: 120px">
-        <h2 class="rv" style="margin: 0 0 34px; font-family: 'Instrument Serif', serif; font-weight: 400; font-size: clamp(2rem, 3.2vw, 3rem); line-height: 1; letter-spacing: -.028em; color: #241a11">Une carte <span style="font-style: italic; color: #b4813f">généreuse</span></h2>
-        <nav class="rv" aria-label="Catégories" style="display: grid; gap: 2px">
-          <sc-for list="{{ categories }}" as="cat" hint-placeholder-count="6">
-            <button onClick="{{ cat.select }}" aria-current="{{ cat.selected }}" style="display: flex; align-items: baseline; justify-content: space-between; gap: 14px; padding: 12px 0; border: 0; border-bottom: 1px solid {{ cat.rule }}; background: transparent; cursor: pointer; text-align: left; font-size: 14px; color: {{ cat.color }}; transition: color .3s ease, border-color .3s ease">
-              <span>{{ cat.label }}</span>
-              <span style="font-size: 10px; font-weight: 500; letter-spacing: .16em; color: {{ cat.dim }}">{{ cat.count }}</span>
-            </button>
-          </sc-for>
-        </nav>
-        <p class="rv" style="margin: 30px 0 0; font-size: 12.5px; line-height: 1.7; color: rgba(46,33,23,.5)">Prix TTC. La carte évolue avec les saisons et les arrivages.</p>
-      </div>
-
-      <div class="cc-rows" style="display: grid">
-        <sc-for list="{{ items }}" as="item" hint-placeholder-count="8">
-          <article class="cc-row" data-img="{{ item.image }}" style="display: grid; grid-template-columns: 34px 1fr auto; align-items: baseline; gap: 24px; padding: 24px 0; border-bottom: 1px solid rgba(60,42,28,.12); transition: opacity .35s ease, transform .5s cubic-bezier(.16,1,.3,1)">
-            <span style="font-size: 10px; font-weight: 500; letter-spacing: .16em; color: rgba(46,33,23,.35)">{{ item.num }}</span>
-            <div>
-              <h3 style="margin: 0; font-family: 'Instrument Serif', serif; font-weight: 400; font-size: clamp(1.25rem, 1.8vw, 1.65rem); line-height: 1.15; letter-spacing: -.015em; color: #241a11">{{ item.name }}</h3>
-              <p style="margin: 7px 0 0; max-width: 38rem; font-size: 14px; line-height: 1.6; color: rgba(46,33,23,.52)">{{ item.description }}</p>
-            </div>
-            <span style="font-size: 14px; font-weight: 500; letter-spacing: .06em; color: #b4813f">{{ item.price }}</span>
-          </article>
-        </sc-for>
-        <a class="mg" href="tel:0666028603" style="display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-top: 40px; padding: 26px 30px; border-radius: 2px; background: #f6e9db; font-size: 11px; font-weight: 500; letter-spacing: .24em; text-transform: uppercase; color: #241a11; transition: background-color .35s ease, transform .4s cubic-bezier(.16,1,.3,1)" style-hover="background: #ead6bc; color: #241a11">
-          Commander par téléphone
-          <span style="font-family: 'Instrument Serif', serif; font-size: 22px; letter-spacing: 0; text-transform: none; color: #b4813f">06 66 02 86 03</span>
-        </a>
-      </div>
-    </div>
-  </div>
-</section>
-
-<div class="cc-peek" style="position: fixed; left: 0; top: 0; z-index: 75; width: 180px; height: 225px; overflow: hidden; border-radius: 2px; pointer-events: none; opacity: 0; transform: translate3d(-999px,-999px,0) scale(.94); transition: opacity .35s ease"><img class="cc-peek-img" src="public/food/latte.png" alt="" style="width: 100%; height: 100%; object-fit: cover" /></div>
-
-<!-- ── 05 · Traiteur ── -->
-<section id="traiteur" data-screen-label="Traiteur" style="position: relative; background: #241a11; padding: clamp(90px, 14vh, 160px) clamp(56px, 8vw, 150px)">
-  <div style="max-width: 1320px; margin: 0 auto">
-    <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 40px; padding-bottom: 26px; border-bottom: 1px solid rgba(251,244,236,.16)">
-      <p class="rv" style="margin: 0; font-size: 10.5px; font-weight: 500; letter-spacing: .3em; text-transform: uppercase; color: rgba(217,168,104,.85)">05 — Traiteur</p>
-      <p class="rv" style="margin: 0; font-size: 10.5px; font-weight: 500; letter-spacing: .3em; text-transform: uppercase; color: rgba(251,244,236,.35)">Devis sous 24 h</p>
-    </div>
-
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: clamp(40px, 6vw, 100px); margin-top: clamp(40px, 7vh, 80px); align-items: start">
-      <div>
-        <h2 style="margin: 0; font-family: 'Instrument Serif', serif; font-weight: 400; font-size: clamp(2.4rem, 5.2vw, 5rem); line-height: .96; letter-spacing: -.03em; color: #fbf4ec">
-          <span style="display: block; overflow: hidden; padding-bottom: 2px"><span class="wd" style="display: block">Vos événements,</span></span>
-          <span style="display: block; overflow: hidden; padding-bottom: 6px"><span class="wd" style="display: block; font-style: italic; color: #d9a868">notre métier.</span></span>
-        </h2>
-        <p class="rv" style="margin: 30px 0 0; max-width: 30rem; font-size: 16px; line-height: 1.75; color: rgba(251,244,236,.55)">Anniversaires, mariages, séminaires, baptêmes — on prend le buffet en charge de A à Z, de la composition du menu à l'installation sur place.</p>
-        <figure class="rv" style="margin: clamp(34px, 5vh, 56px) 0 0">
-          <div class="cc-wide" style="position: relative; aspect-ratio: 4 / 3; overflow: hidden; border-radius: 2px">
-            <img src="public/food/traiteur-buffet.png" alt="Buffet traiteur du Café Concept" style="width: 100%; height: 100%; object-fit: cover; transform: scale(1.08)" />
-          </div>
-        </figure>
-      </div>
-
-      <div>
-        <ol style="list-style: none; margin: 0; padding: 0">
-          <sc-for list="{{ offres }}" as="offre" hint-placeholder-count="3">
-            <li class="rv" style="display: grid; grid-template-columns: 46px 1fr; gap: 24px; padding: 28px 0; border-bottom: 1px solid rgba(251,244,236,.14)">
-              <span style="font-size: 10px; font-weight: 500; letter-spacing: .2em; color: rgba(217,168,104,.8)">{{ offre.num }}</span>
-              <div>
-                <h3 style="margin: 0; font-family: 'Instrument Serif', serif; font-weight: 400; font-size: clamp(1.35rem, 2vw, 1.85rem); line-height: 1.1; color: #fbf4ec">{{ offre.title }}</h3>
-                <p style="margin: 10px 0 0; max-width: 28rem; font-size: 14.5px; line-height: 1.7; color: rgba(251,244,236,.5)">{{ offre.text }}</p>
-              </div>
-            </li>
-          </sc-for>
-        </ol>
-        <ul class="rv" style="list-style: none; display: grid; margin: 30px 0 0; padding: 0">
-          <sc-for list="{{ garanties }}" as="g" hint-placeholder-count="4">
-            <li style="display: flex; align-items: center; gap: 14px; padding: 13px 0; font-size: 11px; font-weight: 500; letter-spacing: .2em; text-transform: uppercase; color: rgba(251,244,236,.6)">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#d9a868" stroke-width="2.4" stroke-linecap="round"><path d="M20 6 9 17l-5-5" /></svg>
-              {{ g }}
-            </li>
-          </sc-for>
-        </ul>
-        <button class="mg rv" onClick="{{ goDevis }}" style="display: flex; align-items: center; gap: 14px; margin-top: 34px; padding: 18px 32px; border: 0; border-radius: 2px; background: #fbf4ec; cursor: pointer; font-size: 11px; font-weight: 500; letter-spacing: .24em; text-transform: uppercase; color: #241a11; transition: background-color .35s ease, transform .4s cubic-bezier(.16,1,.3,1)" style-hover="background: #d9a868">Demander un devis
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+      <div class="rv" style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: clamp(24px, 4vh, 40px)">
+        <button onClick="{{ goCarte }}" style="display: flex; align-items: center; gap: 12px; padding: 16px 28px; border: 0; border-radius: 999px; background: #fff3e2; cursor: pointer; font-size: 10.5px; font-weight: 500; letter-spacing: .2em; text-transform: uppercase; color: #1b1209; transition: background-color .35s ease" style-hover="background: #d9a868">Voir la carte
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
         </button>
+        <button onClick="{{ goTraiteur }}" style="padding: 16px 28px; border: 1px solid rgba(255,243,226,.24); border-radius: 999px; background: transparent; cursor: pointer; font-size: 10.5px; font-weight: 500; letter-spacing: .2em; text-transform: uppercase; color: #fff3e2; transition: border-color .35s ease, color .35s ease" style-hover="border-color: #d9a868; color: #d9a868">Traiteur</button>
       </div>
     </div>
+
+    <figure class="rv" style="position: relative; margin: 0">
+      <div class="shot" style="position: relative; aspect-ratio: 1 / 1.15; overflow: hidden; background: #3c2a1c; border-radius: 62% 38% 54% 46% / 52% 56% 44% 48%; animation: blobA 21s ease-in-out infinite">
+        <img src="public/food/cafe-interior.png" alt="La salle du Café Concept" style="width: 100%; height: 100%; object-fit: cover" />
+      </div>
+      <div class="seal" aria-hidden="true" style="position: absolute; left: -18px; bottom: 24px; display: flex; align-items: center; justify-content: center; width: 88px; height: 88px; border-radius: 999px; background: #d9a868; animation: rot 26s linear infinite">
+        <img src="public/brand/badge.png" alt="" style="width: 44px; height: 44px; object-fit: contain" />
+      </div>
+    </figure>
   </div>
 </section>
 
-<!-- ── 06 · Avis ── -->
-<section id="avis" data-screen-label="Avis" style="position: relative; background: #fbf4ec; padding: clamp(90px, 14vh, 160px) clamp(56px, 8vw, 150px)">
-  <div style="max-width: 1320px; margin: 0 auto">
-    <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 40px; padding-bottom: 26px; border-bottom: 1px solid rgba(60,42,28,.16)">
-      <p class="rv" style="margin: 0; font-size: 10.5px; font-weight: 500; letter-spacing: .3em; text-transform: uppercase; color: #b4813f">06 — Avis</p>
-      <p class="rv" style="margin: 0; font-size: 10.5px; font-weight: 500; letter-spacing: .3em; text-transform: uppercase; color: rgba(46,33,23,.45)">240+ avis Google</p>
-    </div>
+</div>
 
-    <blockquote style="margin: clamp(40px, 7vh, 84px) 0 0; max-width: 46rem; font-family: 'Instrument Serif', serif; font-size: clamp(1.8rem, 3.8vw, 3.4rem); line-height: 1.2; letter-spacing: -.028em; color: #241a11">
-      <span style="display: block; overflow: hidden; padding-bottom: .04em"><span class="wd" style="display: block">« Très bon café-resto de quartier.</span></span>
-      <span style="display: block; overflow: hidden; padding-bottom: .04em"><span class="wd" style="display: block">Les portions sont <span style="font-style: italic; color: #b4813f">généreuses</span></span></span>
-      <span style="display: block; overflow: hidden; padding-bottom: .06em"><span class="wd" style="display: block">et de qualité. »</span></span>
-    </blockquote>
-    <p class="rv" style="margin: 26px 0 0; font-size: 10px; font-weight: 500; letter-spacing: .26em; text-transform: uppercase; color: rgba(46,33,23,.5)">Jonathan K. — avis Google</p>
+<!-- ══ 02 · SIGNATURES — éventail de cartes ══ -->
+<section id="signatures" data-screen-label="Signatures" style="position: relative; padding: clamp(30px, 6vh, 70px) clamp(20px, 4vw, 60px) clamp(70px, 12vh, 140px)">
+  <div aria-hidden="true" style="position: absolute; inset: 0; background: radial-gradient(120% 78% at 50% 116%, #f4dcba 0%, rgba(244,220,186,0) 62%), radial-gradient(58% 44% at 12% 8%, rgba(180,129,63,.16) 0%, rgba(180,129,63,0) 70%), radial-gradient(52% 40% at 92% 22%, rgba(217,168,104,.2) 0%, rgba(217,168,104,0) 70%)"></div>
 
-    <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 48px; flex-wrap: wrap; margin-top: clamp(56px, 9vh, 100px); padding-top: 30px; border-top: 1px solid rgba(60,42,28,.16)">
-      <h2 class="rv" style="margin: 0; font-family: 'Instrument Serif', serif; font-weight: 400; font-size: clamp(2rem, 4vw, 3.6rem); line-height: 1; letter-spacing: -.03em; color: #241a11">Et 240 autres<br /><span style="font-style: italic; color: #b4813f">comme lui.</span></h2>
-      <div style="display: flex; align-items: flex-end; gap: 18px">
-        <span class="cc-num" data-to="4.9" data-dec="1" data-suffix="" style="font-family: 'Instrument Serif', serif; font-size: clamp(3.4rem, 7vw, 6.6rem); line-height: .86; letter-spacing: -.03em; color: #241a11">4,9</span>
-        <span style="padding-bottom: 12px; font-size: 10px; font-weight: 500; letter-spacing: .26em; text-transform: uppercase; color: rgba(46,33,23,.45)">sur 5</span>
+  <div style="position: relative; z-index: 2; display: flex; align-items: baseline; justify-content: space-between; gap: 26px; flex-wrap: wrap">
+    <p style="margin: 0; font-size: 10px; font-weight: 500; letter-spacing: .3em; text-transform: uppercase; color: #b4813f">02 — Signatures</p>
+    <p style="margin: 0; font-size: 10px; font-weight: 500; letter-spacing: .3em; text-transform: uppercase; color: rgba(46,33,23,.4)">Les cinq incontournables</p>
+  </div>
+
+  <h2 class="sf" style="position: relative; z-index: 2; margin: clamp(20px, 3.4vh, 40px) 0 0; max-width: 24rem; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(1.9rem, 4.6vw, 4.2rem); line-height: .98; letter-spacing: -.05em; color: #1b1209">CE QU'ON VIENT CHERCHER ICI.</h2>
+
+  <!-- éventail de cartes : au survol, la carte se redresse et écarte ses voisines -->
+  <div class="bc" style="position: relative; z-index: 2; display: flex; align-items: center; justify-content: center; width: 100%; height: clamp(250px, 32vw, 430px); margin-top: clamp(26px, 4.4vh, 56px)">
+    <sc-for list="{{ signatures }}" as="dish" hint-placeholder-count="5">
+      <div class="bc-card" data-name="{{ dish.name }}" data-tag="{{ dish.tag }}" data-price="{{ dish.price }}" style="position: absolute; width: clamp(150px, 17vw, 232px); aspect-ratio: 1; overflow: hidden; border: 5px solid #fff3e2; border-radius: 28px; box-shadow: 0 18px 40px -22px rgba(27,18,9,.45); cursor: pointer; transform: scale(0)">
+        <img class="li" data-src="{{ dish.image }}" alt="{{ dish.name }}" style="width: 100%; height: 100%; object-fit: cover" />
       </div>
-    </div>
+    </sc-for>
+  </div>
 
-    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(28px, 4vw, 64px); margin-top: clamp(44px, 7vh, 80px)">
-      <sc-for list="{{ reviews }}" as="review" hint-placeholder-count="3">
-        <figure class="rv" style="margin: 0; padding-top: 24px; border-top: 1px solid rgba(60,42,28,.16)">
-          <span style="font-size: 10px; font-weight: 500; letter-spacing: .2em; color: rgba(46,33,23,.35)">{{ review.num }}</span>
-          <blockquote style="margin: 20px 0 0; font-size: 15px; line-height: 1.7; color: #6b5847">« {{ review.text }} »</blockquote>
-          <figcaption style="margin-top: 22px; font-size: 10px; font-weight: 500; letter-spacing: .26em; text-transform: uppercase; color: rgba(46,33,23,.5)">{{ review.name }} — {{ review.context }}</figcaption>
-        </figure>
-      </sc-for>
-    </div>
+  <div class="bc-label" style="position: relative; z-index: 2; display: flex; align-items: baseline; justify-content: center; gap: 16px; flex-wrap: wrap; min-height: 2.6em; margin-top: clamp(16px, 2.6vh, 30px); text-align: center">
+    <span class="bc-name" style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 600; font-size: clamp(1.15rem, 1.9vw, 1.7rem); letter-spacing: -.03em; color: #1b1209; transition: opacity .3s ease">&nbsp;</span>
+    <span class="bc-tag" style="font-size: 13.5px; line-height: 1.5; color: rgba(46,33,23,.5); transition: opacity .3s ease"></span>
+    <span class="bc-price" style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 15px; font-weight: 600; color: #b4813f; transition: opacity .3s ease"></span>
+  </div>
+
+  <div style="position: relative; z-index: 2; display: flex; justify-content: center; margin-top: clamp(26px, 4.4vh, 52px)">
+    <button onClick="{{ goCarte }}" style="display: flex; align-items: center; gap: 12px; padding: 17px 32px; border: 0; border-radius: 999px; background: #1b1209; cursor: pointer; font-size: 10.5px; font-weight: 500; letter-spacing: .2em; text-transform: uppercase; color: #fff3e2; transition: background-color .35s ease" style-hover="background: #b4813f">Les 70 autres gourmandises
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+    </button>
   </div>
 </section>
 
-<!-- ── 07 · Contact ── -->
-<section id="contact" data-screen-label="Contact" style="position: relative; background: #f6e9db; padding: clamp(90px, 14vh, 160px) clamp(56px, 8vw, 150px)">
-  <div style="max-width: 1320px; margin: 0 auto">
-    <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 40px; padding-bottom: 26px; border-bottom: 1px solid rgba(60,42,28,.16)">
-      <p class="rv" style="margin: 0; font-size: 10.5px; font-weight: 500; letter-spacing: .3em; text-transform: uppercase; color: #b4813f">07 — Nous trouver</p>
-      <p class="rv" style="margin: 0; font-size: 10.5px; font-weight: 500; letter-spacing: .3em; text-transform: uppercase; color: rgba(46,33,23,.45)">Moissy-Cramayel · Sénart</p>
-    </div>
-    <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 48px; flex-wrap: wrap; margin: clamp(34px, 6vh, 64px) 0 clamp(44px, 7vh, 80px)">
-      <h2 class="rv" style="margin: 0; max-width: 30rem; font-family: 'Instrument Serif', serif; font-weight: 400; font-size: clamp(2.2rem, 4.6vw, 4.4rem); line-height: .98; letter-spacing: -.03em; color: #241a11">Passez nous voir, <span style="font-style: italic; color: #b4813f">on vous attend.</span></h2>
-      <img class="rv" src="public/brand/wordmark.png" alt="Café Concept" style="display: block; width: clamp(160px, 20vw, 250px); object-fit: contain" />
-    </div>
+<!-- ══ 03 · UNE JOURNÉE — arc de galets ══ -->
+<section id="rituel" data-screen-label="Rituel" style="position: relative; padding: clamp(50px, 9vh, 110px) clamp(20px, 4vw, 60px); background: #f8e7d0; overflow: hidden">
+  <line-waves aria-hidden="true" paper="#f8e7d0" color1="#b4813f" color2="#1b1209" color3="#d9a868" brightness="0.42" speed="0.26" rotation="-45" warp="1" inner-lines="30" outer-lines="36" mouse-influence="1.6" style="position: absolute; inset: 0; z-index: 0"></line-waves>
+  <div aria-hidden="true" style="position: absolute; z-index: 1; inset-inline: 0; top: 0; line-height: 0">
+    <svg viewBox="0 0 1440 120" preserveAspectRatio="none" style="display: block; width: 100%; height: clamp(50px, 7vw, 100px)"><path d="M0,0 C260,86 420,-16 700,26 C960,64 1120,110 1440,44 L1440,0 Z" fill="#fff3e2" /></svg>
+  </div>
 
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: clamp(40px, 6vw, 100px); align-items: start">
-      <div class="rv">
-        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 30px; padding: 16px 20px; border-radius: 2px; background: #fbf4ec">
-          <span style="display: block; width: 6px; height: 6px; border-radius: 999px; background: {{ statusColor }}; animation: cc-pulse 2.4s ease-in-out infinite"></span>
-          <span style="font-size: 11px; font-weight: 500; letter-spacing: .2em; text-transform: uppercase; color: #241a11">{{ statusLong }}</span>
-        </div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px 40px; padding-bottom: 30px; border-bottom: 1px solid rgba(60,42,28,.16)">
-          <div>
-            <p style="margin: 0 0 12px; font-size: 10px; font-weight: 500; letter-spacing: .26em; text-transform: uppercase; color: rgba(46,33,23,.45)">Adresse</p>
-            <p style="margin: 0; font-size: 15.5px; line-height: 1.7; color: #241a11">502 Avenue des Meuniers<br />77550 Moissy-Cramayel</p>
-            <a href="https://www.google.com/maps/place/502+Avenue+des+Meuniers,+77550+Moissy-Cramayel" target="_blank" rel="noopener" style="display: inline-block; margin-top: 10px; font-size: 13px">Itinéraire →</a>
-          </div>
-          <div>
-            <p style="margin: 0 0 12px; font-size: 10px; font-weight: 500; letter-spacing: .26em; text-transform: uppercase; color: rgba(46,33,23,.45)">Contact</p>
-            <p style="margin: 0; font-size: 15.5px; line-height: 1.7; color: #241a11"><a href="tel:0666028603">06 66 02 86 03</a><br /><a href="mailto:cafe.concept@outlook.fr">cafe.concept@outlook.fr</a></p>
-          </div>
-        </div>
-        <div style="padding: 30px 0">
-          <p style="margin: 0 0 16px; font-size: 10px; font-weight: 500; letter-spacing: .26em; text-transform: uppercase; color: rgba(46,33,23,.45)">Horaires</p>
-          <ul style="list-style: none; margin: 0; padding: 0; display: grid">
-            <sc-for list="{{ hours }}" as="h" hint-placeholder-count="7">
-              <li style="display: flex; align-items: baseline; gap: 16px; padding: 10px 0; border-bottom: 1px solid rgba(60,42,28,.09)">
-                <span style="width: 96px; flex-shrink: 0; font-size: 14.5px; color: {{ h.color }}">{{ h.day }}</span>
-                <span style="flex: 1; height: 1px; background: rgba(60,42,28,.14)"></span>
-                <span style="font-size: 14.5px; color: {{ h.color }}">{{ h.hours }}</span>
-                <span style="width: 60px; flex-shrink: 0; text-align: right; font-size: 9px; font-weight: 500; letter-spacing: .2em; text-transform: uppercase; color: #b4813f">{{ h.today }}</span>
-              </li>
-            </sc-for>
-          </ul>
-        </div>
-        <div style="overflow: hidden; border-radius: 2px; border: 1px solid rgba(60,42,28,.14)">
-          <iframe src="https://www.google.com/maps?q=Caf%C3%A9+Concept,+502+Avenue+des+Meuniers,+77550+Moissy-Cramayel&output=embed" title="Carte — Café Concept, Moissy-Cramayel" loading="lazy" style="display: block; width: 100%; height: 300px; border: 0; filter: grayscale(.35) saturate(.9)"></iframe>
-        </div>
-      </div>
+  <div style="position: relative; z-index: 2; display: flex; align-items: baseline; justify-content: space-between; gap: 26px; flex-wrap: wrap; margin-top: clamp(30px, 5vh, 60px)">
+    <p style="margin: 0; font-size: 10px; font-weight: 500; letter-spacing: .3em; text-transform: uppercase; color: #b4813f">03 — Une journée</p>
+    <p style="margin: 0; font-size: 10px; font-weight: 500; letter-spacing: .3em; text-transform: uppercase; color: rgba(46,33,23,.4)">8h30 → 20h</p>
+  </div>
 
-      <form class="rv" onSubmit="{{ submit }}" style="display: grid; gap: 26px">
-        <p style="margin: 0; font-family: 'Instrument Serif', serif; font-size: clamp(1.6rem, 2.4vw, 2.2rem); line-height: 1.1; color: #241a11">Écrivez-nous</p>
-        <label style="display: grid; gap: 10px">
-          <span style="font-size: 10px; font-weight: 500; letter-spacing: .26em; text-transform: uppercase; color: rgba(46,33,23,.45)">Nom</span>
-          <input type="text" name="nom" placeholder="Votre nom" style="width: 100%; padding: 12px 0; border: 0; border-bottom: 1px solid rgba(60,42,28,.24); background: transparent; font-size: 16px; color: #241a11; outline: none" style-focus="border-color: #b4813f" />
-        </label>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 26px">
-          <label style="display: grid; gap: 10px">
-            <span style="font-size: 10px; font-weight: 500; letter-spacing: .26em; text-transform: uppercase; color: rgba(46,33,23,.45)">Email</span>
-            <input type="email" name="email" placeholder="vous@email.fr" style="width: 100%; padding: 12px 0; border: 0; border-bottom: 1px solid rgba(60,42,28,.24); background: transparent; font-size: 16px; color: #241a11; outline: none" style-focus="border-color: #b4813f" />
-          </label>
-          <label style="display: grid; gap: 10px">
-            <span style="font-size: 10px; font-weight: 500; letter-spacing: .26em; text-transform: uppercase; color: rgba(46,33,23,.45)">Téléphone</span>
-            <input type="tel" name="tel" placeholder="06 …" style="width: 100%; padding: 12px 0; border: 0; border-bottom: 1px solid rgba(60,42,28,.24); background: transparent; font-size: 16px; color: #241a11; outline: none" style-focus="border-color: #b4813f" />
-          </label>
+  <div style="position: relative; z-index: 2; display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start; gap: clamp(20px, 3.4vw, 60px); margin-top: clamp(30px, 5vh, 58px)">
+    <sc-for list="{{ moments }}" as="m" hint-placeholder-count="3">
+      <article class="rv" style="width: clamp(230px, 25vw, 340px); margin-top: {{ m.offset }}">
+        <div class="shot" style="position: relative; aspect-ratio: 1 / 1; overflow: hidden; background: #ead6bc; border-radius: {{ m.radius }}; animation: {{ m.anim }} 24s ease-in-out infinite">
+          <img class="li" data-src="{{ m.image }}" alt="{{ m.title }}" style="width: 100%; height: 100%; object-fit: cover" />
+          <span style="position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%); padding: 8px 18px; border-radius: 999px; background: rgba(27,18,9,.72); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); font-family: 'Bricolage Grotesque', sans-serif; font-size: 15px; font-weight: 600; letter-spacing: .02em; color: #fff3e2">{{ m.time }}</span>
         </div>
-        <label style="display: grid; gap: 10px">
-          <span style="font-size: 10px; font-weight: 500; letter-spacing: .26em; text-transform: uppercase; color: rgba(46,33,23,.45)">Sujet</span>
-          <input class="cc-subject" type="text" name="sujet" placeholder="Réservation, traiteur, question…" style="width: 100%; padding: 12px 0; border: 0; border-bottom: 1px solid rgba(60,42,28,.24); background: transparent; font-size: 16px; color: #241a11; outline: none" style-focus="border-color: #b4813f" />
-        </label>
-        <label style="display: grid; gap: 10px">
-          <span style="font-size: 10px; font-weight: 500; letter-spacing: .26em; text-transform: uppercase; color: rgba(46,33,23,.45)">Message</span>
-          <textarea name="message" rows="4" placeholder="Dites-nous tout…" style="width: 100%; padding: 12px 0; border: 0; border-bottom: 1px solid rgba(60,42,28,.24); background: transparent; font-size: 16px; line-height: 1.6; color: #241a11; outline: none; resize: vertical" style-focus="border-color: #b4813f"></textarea>
-        </label>
-        <button class="mg" type="submit" style="justify-self: start; margin-top: 4px; padding: 18px 34px; border: 0; border-radius: 2px; background: #241a11; cursor: pointer; font-size: 11px; font-weight: 500; letter-spacing: .24em; text-transform: uppercase; color: #fbf4ec; transition: background-color .35s ease, transform .4s cubic-bezier(.16,1,.3,1)" style-hover="background: #b4813f">{{ submitLabel }}</button>
-        <p style="margin: 0; font-size: 12.5px; line-height: 1.65; color: rgba(46,33,23,.5)">{{ formNote }}</p>
-      </form>
-    </div>
+        <h3 style="margin: 18px 0 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 600; font-size: clamp(1rem, 1.4vw, 1.22rem); line-height: 1.25; letter-spacing: -.02em; color: #1b1209">{{ m.title }}</h3>
+        <p style="margin: 8px 0 0; font-size: 13.5px; line-height: 1.7; color: #6b5847">{{ m.text }}</p>
+      </article>
+    </sc-for>
   </div>
 </section>
-</main>
 
-<footer style="position: relative; background: #241a11; color: #fbf4ec; padding: clamp(70px, 11vh, 130px) clamp(56px, 8vw, 150px) 32px; overflow: hidden">
-  <div style="max-width: 1320px; margin: 0 auto">
-    <div style="display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 40px; padding-bottom: 44px; border-bottom: 1px solid rgba(251,244,236,.14)">
-      <div>
-        <img src="public/brand/wordmark-cream.png" alt="Café Concept" style="display: block; width: clamp(200px, 22vw, 280px); object-fit: contain; object-position: left" />
-        <p style="margin: 22px 0 0; max-width: 20rem; font-size: 13.5px; line-height: 1.7; color: rgba(251,244,236,.45)">Restaurant &amp; traiteur, fait maison chaque matin à Moissy-Cramayel.</p>
+<!-- ══ 04 · LA CARTE ══ -->
+<section id="carte" data-screen-label="Carte" style="position: relative; padding: clamp(60px, 11vh, 130px) clamp(20px, 4vw, 60px); overflow: hidden">
+  <div aria-hidden="true" class="blob" style="position: absolute; right: -16vw; bottom: 8vh; width: 38vw; height: 38vw; background: radial-gradient(circle at 40% 40%, #f4d9b2, #edc99a); opacity: .3; filter: blur(6px); animation: blobB 29s ease-in-out infinite, drift 38s ease-in-out infinite"></div>
+
+  <div style="position: relative; z-index: 2; display: flex; align-items: baseline; justify-content: space-between; gap: 26px; flex-wrap: wrap">
+    <p style="margin: 0; font-size: 10px; font-weight: 500; letter-spacing: .3em; text-transform: uppercase; color: #b4813f">04 — La carte</p>
+    <p style="margin: 0; font-size: 10px; font-weight: 500; letter-spacing: .3em; text-transform: uppercase; color: rgba(46,33,23,.4)">Sur place ou à emporter</p>
+  </div>
+
+  <div style="position: relative; z-index: 2; display: flex; flex-wrap: wrap; gap: 8px; margin-top: clamp(24px, 4vh, 44px)">
+    <sc-for list="{{ categories }}" as="cat" hint-placeholder-count="6">
+      <button onClick="{{ cat.select }}" aria-current="{{ cat.selected }}" style="display: flex; align-items: baseline; gap: 9px; padding: 12px 22px; border: 1px solid {{ cat.border }}; border-radius: 999px; background: {{ cat.bg }}; cursor: pointer; font-size: 13.5px; color: {{ cat.color }}; transition: background-color .3s ease, color .3s ease, border-color .3s ease">
+        <span style="white-space: nowrap">{{ cat.label }}</span>
+        <span style="font-size: 9.5px; font-weight: 500; letter-spacing: .14em; color: {{ cat.dim }}">{{ cat.count }}</span>
+      </button>
+    </sc-for>
+  </div>
+
+  <div style="position: relative; z-index: 2; display: grid; grid-template-columns: 1fr 1fr; gap: 0 clamp(26px, 4vw, 70px); margin-top: clamp(24px, 4vh, 42px)">
+    <sc-for list="{{ items }}" as="item" hint-placeholder-count="8">
+      <article style="display: grid; grid-template-columns: 52px 1fr auto; align-items: center; gap: 16px; padding: 13px 0; border-bottom: 1px solid rgba(27,18,9,.1)">
+        <div style="width: 52px; height: 52px; overflow: hidden; border-radius: 58% 42% 46% 54% / 48% 52% 48% 52%; background: rgba(27,18,9,.06)">
+          <img class="li" data-src="{{ item.image }}" alt="" style="width: 100%; height: 100%; object-fit: cover" />
+        </div>
+        <div>
+          <h3 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 600; font-size: clamp(1rem, 1.3vw, 1.12rem); line-height: 1.25; letter-spacing: -.02em; color: #1b1209">{{ item.name }}</h3>
+          <p style="margin: 5px 0 0; max-width: 32rem; font-size: 12.5px; line-height: 1.6; color: rgba(46,33,23,.5)">{{ item.description }}</p>
+        </div>
+        <span style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 14px; font-weight: 600; color: #b4813f">{{ item.price }}</span>
+      </article>
+    </sc-for>
+  </div>
+
+  <a href="tel:0666028603" style="position: relative; z-index: 2; display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-top: clamp(28px, 5vh, 50px); padding: 24px 32px; border-radius: 999px; background: #1b1209; font-size: 10.5px; font-weight: 500; letter-spacing: .2em; text-transform: uppercase; color: #fff3e2; transition: background-color .35s ease" style-hover="background: #b4813f; color: #fff3e2">
+    Commander par téléphone
+    <span style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 19px; font-weight: 600; letter-spacing: .01em; text-transform: none; color: #d9a868">06 66 02 86 03</span>
+  </a>
+</section>
+
+<!-- ══ 05 · TRAITEUR ══ -->
+<div style="position: relative; -webkit-mask-image: url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 1440 150%22 preserveAspectRatio=%22none%22%3E%3Cpath d=%22M0,58 C180,96 330,140 590,116 C860,90 1010,16 1250,50 C1340,62 1400,84 1440,100 L1440,150 L0,150 Z%22 fill=%22%23fff%22/%3E%3C/svg%3E'), linear-gradient(#000, #000), url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 1440 150%22 preserveAspectRatio=%22none%22%3E%3Cpath d=%22M0,0 L1440,0 L1440,88 C1240,54 1100,4 860,32 C620,60 470,132 240,110 C140,100 60,76 0,54 Z%22 fill=%22%23fff%22/%3E%3C/svg%3E'); mask-image: url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 1440 150%22 preserveAspectRatio=%22none%22%3E%3Cpath d=%22M0,58 C180,96 330,140 590,116 C860,90 1010,16 1250,50 C1340,62 1400,84 1440,100 L1440,150 L0,150 Z%22 fill=%22%23fff%22/%3E%3C/svg%3E'), linear-gradient(#000, #000), url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 1440 150%22 preserveAspectRatio=%22none%22%3E%3Cpath d=%22M0,0 L1440,0 L1440,88 C1240,54 1100,4 860,32 C620,60 470,132 240,110 C140,100 60,76 0,54 Z%22 fill=%22%23fff%22/%3E%3C/svg%3E'); -webkit-mask-size: 100% clamp(60px, 9vw, 130px), 100% calc(100% - 2 * clamp(60px, 9vw, 130px)), 100% clamp(60px, 9vw, 130px); mask-size: 100% clamp(60px, 9vw, 130px), 100% calc(100% - 2 * clamp(60px, 9vw, 130px)), 100% clamp(60px, 9vw, 130px); -webkit-mask-position: 0 0, 0 clamp(60px, 9vw, 130px), 0 100%; mask-position: 0 0, 0 clamp(60px, 9vw, 130px), 0 100%; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat">
+<section id="traiteur" data-screen-label="Traiteur" style="position: relative; padding: clamp(80px, 12vw, 165px) clamp(20px, 4vw, 60px) clamp(110px, 15vw, 210px); background: #1b1209; color: #fff3e2; overflow: hidden">
+  <ripple-bg aria-hidden="true" base="#1b1209" accent="#b4813f" highlight="#d9a868" style="position: absolute; inset: 0; z-index: 0"></ripple-bg>
+
+  <div style="position: relative; z-index: 2; display: flex; align-items: baseline; justify-content: space-between; gap: 26px; flex-wrap: wrap">
+    <p style="margin: 0; font-size: 10px; font-weight: 500; letter-spacing: .3em; text-transform: uppercase; color: rgba(217,168,104,.85)">05 — Traiteur</p>
+    <p style="margin: 0; font-size: 10px; font-weight: 500; letter-spacing: .3em; text-transform: uppercase; color: rgba(255,243,226,.32)">Devis sous 24 h</p>
+  </div>
+
+  <h2 class="sf" style="position: relative; z-index: 2; margin: clamp(24px, 4.4vh, 54px) 0 0 clamp(0px, 6vw, 110px); max-width: 26rem; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(1.9rem, 5vw, 4.6rem); line-height: .98; letter-spacing: -.05em; color: #fff3e2">VOS ÉVÉNEMENTS, NOTRE MÉTIER.</h2>
+
+  <div style="position: relative; z-index: 2; display: grid; grid-template-columns: .9fr 1.1fr; gap: clamp(30px, 5vw, 80px); margin-top: clamp(30px, 5vh, 58px); align-items: center">
+    <figure class="rv" style="margin: 0">
+      <div class="shot" style="position: relative; aspect-ratio: 1 / 1; overflow: hidden; background: #3c2a1c; border-radius: 44% 56% 62% 38% / 46% 42% 58% 54%; animation: blobB 23s ease-in-out infinite">
+        <img src="public/food/traiteur-buffet.png" alt="Buffet traiteur du Café Concept" style="width: 100%; height: 100%; object-fit: cover" />
       </div>
-      <nav aria-label="Pied de page" style="display: grid; gap: 12px; align-content: start">
-        <sc-for list="{{ links }}" as="link" hint-placeholder-count="6">
-          <button onClick="{{ link.go }}" style="justify-self: start; padding: 0; border: 0; background: transparent; cursor: pointer; font-size: 10.5px; font-weight: 500; letter-spacing: .26em; text-transform: uppercase; color: rgba(251,244,236,.55); transition: color .3s ease" style-hover="color: #d9a868">{{ link.label }}</button>
+    </figure>
+    <div>
+      <p class="rv" style="margin: 0; max-width: 30rem; font-size: 16px; line-height: 1.8; color: rgba(255,243,226,.55)">Anniversaires, mariages, séminaires, baptêmes — on prend le buffet en charge de A à Z : composition du menu, quantités, livraison et installation sur place.</p>
+      <ol style="list-style: none; margin: 24px 0 0; padding: 0">
+        <sc-for list="{{ offres }}" as="offre" hint-placeholder-count="3">
+          <li class="rv" style="display: grid; grid-template-columns: 32px 1fr; gap: 16px; padding: 20px 0; border-top: 1px solid rgba(255,243,226,.14)">
+            <span style="font-size: 9.5px; font-weight: 500; letter-spacing: .18em; color: rgba(217,168,104,.8)">{{ offre.num }}</span>
+            <div>
+              <h3 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 600; font-size: clamp(1.05rem, 1.6vw, 1.35rem); line-height: 1.2; letter-spacing: -.025em; color: #fff3e2">{{ offre.title }}</h3>
+              <p style="margin: 8px 0 0; max-width: 28rem; font-size: 13.5px; line-height: 1.7; color: rgba(255,243,226,.5)">{{ offre.text }}</p>
+            </div>
+          </li>
         </sc-for>
-      </nav>
-      <div style="display: grid; gap: 10px; align-content: start; font-size: 13.5px; line-height: 1.7; color: rgba(251,244,236,.45)">
-        <span>502 av. des Meuniers, 77550</span>
-        <a href="tel:0666028603" style="color: #d9a868">06 66 02 86 03</a>
-        <a href="mailto:cafe.concept@outlook.fr" style="color: #d9a868">cafe.concept@outlook.fr</a>
-        <span>{{ statusLong }}</span>
+      </ol>
+      <div class="rv" style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 22px">
+        <sc-for list="{{ garanties }}" as="g" hint-placeholder-count="4">
+          <span style="display: flex; align-items: center; gap: 9px; padding: 10px 18px; border-radius: 999px; background: rgba(255,243,226,.07); font-size: 10px; font-weight: 500; letter-spacing: .16em; text-transform: uppercase; color: rgba(255,243,226,.6)">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#d9a868" stroke-width="2.8" stroke-linecap="round"><path d="M20 6 9 17l-5-5" /></svg>
+            {{ g }}
+          </span>
+        </sc-for>
+      </div>
+      <button class="rv" onClick="{{ goDevis }}" style="display: flex; align-items: center; gap: 12px; margin-top: 26px; padding: 17px 32px; border: 0; border-radius: 999px; background: #fff3e2; cursor: pointer; font-size: 10.5px; font-weight: 500; letter-spacing: .2em; text-transform: uppercase; color: #1b1209; transition: background-color .35s ease" style-hover="background: #d9a868">Demander un devis
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+      </button>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<!-- ══ 06 · AVIS ══ -->
+<section id="avis" data-screen-label="Avis" style="position: relative; padding: clamp(30px, 6vh, 70px) clamp(20px, 4vw, 60px) clamp(70px, 12vh, 140px)">
+  <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 26px; flex-wrap: wrap">
+    <p style="margin: 0; font-size: 10px; font-weight: 500; letter-spacing: .3em; text-transform: uppercase; color: #b4813f">06 — Avis</p>
+    <p style="margin: 0; font-size: 10px; font-weight: 500; letter-spacing: .3em; text-transform: uppercase; color: rgba(46,33,23,.4)">240+ avis Google</p>
+  </div>
+
+  <div style="display: flex; align-items: center; gap: clamp(22px, 4vw, 60px); flex-wrap: wrap; margin-top: clamp(26px, 4.6vh, 56px)">
+    <div style="display: flex; align-items: center; justify-content: center; flex-shrink: 0; width: clamp(140px, 17vw, 220px); height: clamp(140px, 17vw, 220px); border-radius: 62% 38% 54% 46% / 52% 56% 44% 48%; background: #1b1209; animation: blobA 22s ease-in-out infinite">
+      <div style="display: flex; align-items: flex-end; gap: 7px">
+        <span class="num" data-to="4.9" data-dec="1" data-suffix="" style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(2.6rem, 5vw, 4.4rem); line-height: .82; letter-spacing: -.06em; color: #fff3e2">4,9</span>
+        <span style="padding-bottom: 7px; font-size: 9px; font-weight: 500; letter-spacing: .2em; text-transform: uppercase; color: rgba(255,243,226,.5)">/ 5</span>
       </div>
     </div>
-    <p aria-hidden="true" class="cc-word" style="margin: clamp(30px, 5vh, 56px) 0 0; font-family: 'Instrument Serif', serif; font-size: clamp(3.2rem, 12.6vw, 13rem); line-height: .8; letter-spacing: -.04em; color: rgba(251,244,236,.07); user-select: none; white-space: nowrap; transform-origin: left bottom; will-change: transform">café concept</p>
-    <div style="display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-top: 30px; padding-top: 22px; border-top: 1px solid rgba(251,244,236,.1); font-size: 10.5px; font-weight: 500; letter-spacing: .2em; text-transform: uppercase; color: rgba(251,244,236,.35)">
-      <span>© 2026 Café Concept</span>
-      <span>Tous droits réservés</span>
+    <blockquote class="sf" style="margin: 0; max-width: 30rem; font-family: 'Instrument Serif', serif; font-size: clamp(1.2rem, 2.4vw, 2.1rem); line-height: 1.35; letter-spacing: -.02em; color: #1b1209">« Très bon café-resto de quartier. Les portions sont généreuses. »</blockquote>
+  </div>
+
+  <div style="display: flex; flex-wrap: wrap; gap: clamp(18px, 3vw, 46px); margin-top: clamp(34px, 6vh, 68px)">
+    <sc-for list="{{ reviews }}" as="review" hint-placeholder-count="3">
+      <figure class="rv" style="flex: 1 1 260px; margin: 0; padding: 26px 28px; border-radius: 30px 30px 30px 8px; background: #f8e7d0">
+        <span style="font-size: 9.5px; font-weight: 500; letter-spacing: .18em; color: rgba(46,33,23,.35)">{{ review.num }}</span>
+        <blockquote style="margin: 14px 0 0; font-size: 14.5px; line-height: 1.7; color: #6b5847">« {{ review.text }} »</blockquote>
+        <figcaption style="margin-top: 16px; font-size: 9.5px; font-weight: 500; letter-spacing: .22em; text-transform: uppercase; color: rgba(46,33,23,.5)">{{ review.name }} — {{ review.context }}</figcaption>
+      </figure>
+    </sc-for>
+  </div>
+</section>
+
+<!-- ══ 07 · CONTACT ══ -->
+<section id="contact" data-screen-label="Contact" style="position: relative; padding: clamp(50px, 9vh, 110px) clamp(20px, 4vw, 60px) clamp(70px, 12vh, 140px); background: #f8e7d0; overflow: hidden">
+  <div aria-hidden="true" style="position: absolute; inset-inline: 0; top: 0; line-height: 0">
+    <svg viewBox="0 0 1440 120" preserveAspectRatio="none" style="display: block; width: 100%; height: clamp(50px, 7vw, 100px)"><path d="M0,0 C300,92 480,-10 760,32 C1010,70 1160,104 1440,38 L1440,0 Z" fill="#fff3e2" /></svg>
+  </div>
+
+  <div style="position: relative; z-index: 2; display: flex; align-items: baseline; justify-content: space-between; gap: 26px; flex-wrap: wrap; margin-top: clamp(26px, 4.6vh, 56px)">
+    <p style="margin: 0; font-size: 10px; font-weight: 500; letter-spacing: .3em; text-transform: uppercase; color: #b4813f">07 — Nous trouver</p>
+    <p style="margin: 0; font-size: 10px; font-weight: 500; letter-spacing: .3em; text-transform: uppercase; color: rgba(46,33,23,.4)">Moissy-Cramayel · Sénart</p>
+  </div>
+
+  <h2 class="sf" style="position: relative; z-index: 2; margin: clamp(22px, 4vh, 48px) 0 clamp(26px, 4.6vh, 52px); max-width: 26rem; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(1.9rem, 5vw, 4.6rem); line-height: .98; letter-spacing: -.05em; color: #1b1209">PASSEZ NOUS VOIR, ON VOUS ATTEND.</h2>
+
+  <div style="position: relative; z-index: 2; display: grid; grid-template-columns: 1fr 1fr; gap: clamp(28px, 4vw, 74px); align-items: start">
+    <div class="rv">
+      <ul style="list-style: none; margin: 0; padding: 0; display: grid; gap: 3px">
+        <sc-for list="{{ hours }}" as="h" hint-placeholder-count="7">
+          <li style="display: flex; align-items: baseline; gap: 14px; padding: 11px 18px; border-radius: 999px; background: {{ h.bg }}">
+            <span style="width: 88px; flex-shrink: 0; font-size: 14px; color: {{ h.color }}">{{ h.day }}</span>
+            <span style="flex: 1; height: 1px; background: rgba(27,18,9,.12)"></span>
+            <span style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 14px; font-weight: 600; color: {{ h.color }}">{{ h.hours }}</span>
+            <span style="width: 56px; flex-shrink: 0; text-align: right; font-size: 8.5px; font-weight: 500; letter-spacing: .16em; text-transform: uppercase; color: #b4813f">{{ h.today }}</span>
+          </li>
+        </sc-for>
+      </ul>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 26px">
+        <div>
+          <p style="margin: 0 0 9px; font-size: 9.5px; font-weight: 500; letter-spacing: .22em; text-transform: uppercase; color: rgba(46,33,23,.45)">Adresse</p>
+          <p style="margin: 0; font-size: 15px; line-height: 1.7; color: #1b1209">502 Avenue des Meuniers<br />77550 Moissy-Cramayel</p>
+          <a href="https://www.google.com/maps/place/502+Avenue+des+Meuniers,+77550+Moissy-Cramayel" target="_blank" rel="noopener" style="display: inline-block; margin-top: 9px; font-size: 13px">Itinéraire →</a>
+        </div>
+        <div>
+          <p style="margin: 0 0 9px; font-size: 9.5px; font-weight: 500; letter-spacing: .22em; text-transform: uppercase; color: rgba(46,33,23,.45)">Contact</p>
+          <p style="margin: 0; font-size: 15px; line-height: 1.7; color: #1b1209"><a href="tel:0666028603">06 66 02 86 03</a><br /><a href="mailto:cafe.concept@outlook.fr">cafe.concept@outlook.fr</a></p>
+        </div>
+      </div>
+      <div style="margin-top: 24px; overflow: hidden; border-radius: 34px">
+        <iframe src="https://www.google.com/maps?q=Caf%C3%A9+Concept,+502+Avenue+des+Meuniers,+77550+Moissy-Cramayel&output=embed" title="Carte — Café Concept, Moissy-Cramayel" loading="lazy" style="display: block; width: 100%; height: 250px; border: 0; filter: grayscale(.4) saturate(.9)"></iframe>
+      </div>
     </div>
+
+    <form class="rv" onSubmit="{{ submit }}" style="display: grid; gap: 20px; padding: clamp(24px, 3vw, 40px); border-radius: 40px 40px 40px 12px; background: #fff3e2">
+      <label style="display: grid; gap: 8px">
+        <span style="font-size: 9.5px; font-weight: 500; letter-spacing: .22em; text-transform: uppercase; color: rgba(46,33,23,.45)">Nom</span>
+        <input type="text" name="nom" placeholder="Votre nom" style="width: 100%; padding: 13px 18px; border: 1px solid rgba(27,18,9,.14); border-radius: 999px; background: #fbeedd; font-size: 15px; color: #1b1209; outline: none; transition: border-color .3s ease" style-focus="border-color: #b4813f" />
+      </label>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px">
+        <label style="display: grid; gap: 8px">
+          <span style="font-size: 9.5px; font-weight: 500; letter-spacing: .22em; text-transform: uppercase; color: rgba(46,33,23,.45)">Email</span>
+          <input type="email" name="email" placeholder="vous@email.fr" style="width: 100%; padding: 13px 18px; border: 1px solid rgba(27,18,9,.14); border-radius: 999px; background: #fbeedd; font-size: 15px; color: #1b1209; outline: none; transition: border-color .3s ease" style-focus="border-color: #b4813f" />
+        </label>
+        <label style="display: grid; gap: 8px">
+          <span style="font-size: 9.5px; font-weight: 500; letter-spacing: .22em; text-transform: uppercase; color: rgba(46,33,23,.45)">Téléphone</span>
+          <input type="tel" name="tel" placeholder="06 …" style="width: 100%; padding: 13px 18px; border: 1px solid rgba(27,18,9,.14); border-radius: 999px; background: #fbeedd; font-size: 15px; color: #1b1209; outline: none; transition: border-color .3s ease" style-focus="border-color: #b4813f" />
+        </label>
+      </div>
+      <label style="display: grid; gap: 8px">
+        <span style="font-size: 9.5px; font-weight: 500; letter-spacing: .22em; text-transform: uppercase; color: rgba(46,33,23,.45)">Sujet</span>
+        <input class="subject" type="text" name="sujet" placeholder="Réservation, traiteur, question…" style="width: 100%; padding: 13px 18px; border: 1px solid rgba(27,18,9,.14); border-radius: 999px; background: #fbeedd; font-size: 15px; color: #1b1209; outline: none; transition: border-color .3s ease" style-focus="border-color: #b4813f" />
+      </label>
+      <label style="display: grid; gap: 8px">
+        <span style="font-size: 9.5px; font-weight: 500; letter-spacing: .22em; text-transform: uppercase; color: rgba(46,33,23,.45)">Message</span>
+        <textarea name="message" rows="5" placeholder="Dites-nous tout…" style="width: 100%; padding: 15px 18px; border: 1px solid rgba(27,18,9,.14); border-radius: 26px; background: #fbeedd; font-size: 15px; line-height: 1.6; color: #1b1209; outline: none; resize: vertical; transition: border-color .3s ease" style-focus="border-color: #b4813f"></textarea>
+      </label>
+      <button type="submit" style="justify-self: start; padding: 16px 32px; border: 0; border-radius: 999px; background: #1b1209; cursor: pointer; font-size: 10.5px; font-weight: 500; letter-spacing: .2em; text-transform: uppercase; color: #fff3e2; transition: background-color .35s ease" style-hover="background: #b4813f">{{ submitLabel }}</button>
+      <p style="margin: 0; font-size: 12px; line-height: 1.6; color: rgba(46,33,23,.5)">{{ formNote }}</p>
+    </form>
+  </div>
+</section>
+
+<footer style="position: relative; padding: clamp(40px, 7vh, 80px) clamp(20px, 4vw, 60px) 26px; background: #1b1209; color: #fff3e2; overflow: hidden">
+  <ripple-bg aria-hidden="true" base="#1b1209" accent="#b4813f" highlight="#d9a868" tint-amount="0.34" glint="0.4" style="position: absolute; inset: 0; z-index: 0"></ripple-bg>
+  <div style="position: relative; z-index: 2; display: flex; align-items: flex-end; justify-content: space-between; gap: 30px; flex-wrap: wrap; padding-bottom: 24px; border-bottom: 1px solid rgba(255,243,226,.14)">
+    <img src="public/brand/wordmark-cream.png" alt="Café Concept" style="display: block; width: clamp(170px, 22vw, 260px); object-fit: contain" />
+    <p style="margin: 0; font-size: 13px; line-height: 1.7; color: rgba(255,243,226,.45)">Lun–Ven 8h30–20h · Sam 9h30–20h · Dim fermé<br /><a href="tel:0666028603" style="color: #d9a868">06 66 02 86 03</a> · <a href="mailto:cafe.concept@outlook.fr" style="color: #d9a868">cafe.concept@outlook.fr</a></p>
+  </div>
+  <p aria-hidden="true" class="word" style="position: relative; z-index: 2; margin: clamp(18px, 3.4vh, 40px) 0 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(2.4rem, 11vw, 10rem); line-height: .8; letter-spacing: -.06em; color: rgba(255,243,226,.08); user-select: none; white-space: nowrap; will-change: transform">À BIENTÔT</p>
+  <div style="position: relative; z-index: 2; display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-top: 20px; padding-top: 16px; border-top: 1px solid rgba(255,243,226,.1); font-size: 10px; font-weight: 500; letter-spacing: .18em; text-transform: uppercase; color: rgba(255,243,226,.32)">
+    <span>© 2026 Café Concept</span>
+    <span>Restaurant &amp; traiteur</span>
   </div>
 </footer>
+
+<!-- ══ LE FILM — un seul élément, plein écran puis replié dans l'écran du portable ══ -->
+<div class="stage" aria-hidden="true" style="position: fixed; left: 0; top: 0; z-index: 56; width: 100vw; height: 100vh; overflow: hidden; pointer-events: none; background: #0d0906; will-change: left, top, width, height">
+  <div class="frames" style="position: absolute; inset: 0; will-change: transform">
+    <img src="analysis/vidframes/f_0.jpg" alt="" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 1" />
+    <img src="analysis/vidframes/f_1.5.jpg" alt="" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0" />
+    <img src="analysis/vidframes/f_3.jpg" alt="" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0" />
+    <img src="analysis/vidframes/f_4.5.jpg" alt="" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0" />
+    <img src="analysis/vidframes/f_6.jpg" alt="" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0" />
+    <img src="analysis/vidframes/f_7.5.jpg" alt="" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0" />
+    <img src="analysis/vidframes/f_9.jpg" alt="" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0" />
+    <img src="analysis/vidframes/f_9.9.jpg" alt="" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0" />
+    <video class="film-video" muted="" playsinline="" preload="auto" aria-hidden="true" disablepictureinpicture="" poster="public/video/intro-poster.jpg" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity .6s ease">
+      <source src="public/video/intro-540.mp4" media="(max-width: 767px)" type="video/mp4" />
+      <source src="public/video/intro.mp4" type="video/mp4" />
+    </video>
+  </div>
+  <div class="sub" style="position: absolute; inset-inline: 0; bottom: 0; padding: 0 clamp(24px, 5vw, 90px) 32px">
+    <div aria-hidden="true" style="position: absolute; inset-inline: 0; bottom: 0; height: 200px; background: linear-gradient(to top, rgba(13,9,6,.9), rgba(13,9,6,0))"></div>
+    <div aria-hidden="true" style="position: absolute; inset-inline: 0; bottom: 0; height: 40px; -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px)"></div>
+    <div style="position: relative; display: flex; align-items: flex-end; justify-content: space-between; gap: 30px">
+      <div style="position: relative; min-height: 68px; flex: 1">
+        <sc-for list="{{ chapters }}" as="c" hint-placeholder-count="3">
+          <div class="cap" style="position: absolute; left: 0; bottom: 0; opacity: 0">
+            <p style="margin: 0; font-size: 9.5px; font-weight: 500; letter-spacing: .28em; text-transform: uppercase; color: rgba(217,168,104,.9)">{{ c.eyebrow }}</p>
+            <p style="margin: 8px 0 0; font-family: 'Instrument Serif', serif; font-size: clamp(1.3rem, 2.6vw, 2.4rem); line-height: 1.1; letter-spacing: -.02em; color: #fff3e2">{{ c.line }}</p>
+          </div>
+        </sc-for>
+      </div>
+      <div style="display: flex; align-items: center; gap: 14px; flex-shrink: 0; padding-bottom: 6px">
+        <span style="font-size: 9.5px; font-weight: 500; letter-spacing: .2em; color: rgba(255,243,226,.5)"><span class="count">01</span>/03</span>
+        <span style="position: relative; display: block; width: clamp(60px, 10vw, 140px); height: 1px; background: rgba(255,243,226,.24)"><span class="scrub" style="position: absolute; inset: 0; transform-origin: left; transform: scaleX(0); background: #d9a868"></span></span>
+      </div>
+    </div>
+  </div>
+</div>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props="{&quot;filmScroll&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:380,&quot;min&quot;:220,&quot;max&quot;:600,&quot;step&quot;:20,&quot;unit&quot;:&quot;vh&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Film&quot;},&quot;cursorPreview&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Carte&quot;},&quot;grain&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Ambiance&quot;}}">
+<script type="text/x-dc" data-dc-script data-props="{&quot;filmScroll&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:340,&quot;min&quot;:220,&quot;max&quot;:520,&quot;step&quot;:20,&quot;unit&quot;:&quot;vh&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Film&quot;}}">
 const fmt = (p) => new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" }).format(p);
 
-const LINKS = [
+/* Le film est porte par une video encodee tout-intra (chaque frame est une
+   keyframe) : le scrub suit le scroll image par image, la ou une pile de
+   JPEG ne donne que des paliers. Les 8 stills du markup ne servent que de
+   repli tant que la video n'est pas decodable. */
+
+const NAV = [
   { href: "#maison", label: "Maison" },
-  { href: "#rituel", label: "Rituel" },
   { href: "#signatures", label: "Signatures" },
+  { href: "#rituel", label: "Journée" },
   { href: "#carte", label: "Carte" },
   { href: "#traiteur", label: "Traiteur" },
   { href: "#contact", label: "Contact" },
 ];
 
-const RAIL = [
-  { href: "#film", num: "00", label: "Film" },
-  { href: "#maison", num: "01", label: "Maison" },
-  { href: "#rituel", num: "02", label: "Rituel" },
-  { href: "#signatures", num: "03", label: "Signatures" },
-  { href: "#carte", num: "04", label: "Carte" },
-  { href: "#traiteur", num: "05", label: "Traiteur" },
-  { href: "#avis", num: "06", label: "Avis" },
-  { href: "#contact", num: "07", label: "Contact" },
+const CHAPTERS = [
+  { eyebrow: "8h30 — la salle se remplit", line: "Tout commence avec le premier café." },
+  { eyebrow: "Café · caramel · épices", line: "Un tourbillon de saveurs, à la minute." },
+  { eyebrow: "Asie · burgers · pâtisseries", line: "De la tasse au bol, tout est fait ici." },
 ];
 
 const MOMENTS = [
-  { time: "08:30", title: "Le four sort les croissants", text: "Viennoiseries pur beurre, café serré, la salle sent le caramel chaud. Les habitués ont leur table.", image: "public/food/latte.png" },
-  { time: "12:00", title: "Le service bat son plein", text: "Bo buns, burgers smashés à la minute, riz sautés. Sur place ou à emporter, tout part chaud.", image: "public/food/bo-bun.png" },
-  { time: "16:30", title: "L'heure du goûter", text: "Cookies maison, brioche moelleuse, latte crémeux — le moment le plus calme de la journée.", image: "public/food/cafe-interior.png" },
+  { time: "08:30", title: "Le four sort les croissants", text: "Viennoiseries pur beurre, café serré, la salle sent le caramel chaud.", image: "public/food/latte.png", offset: "0px", radius: "60% 40% 52% 48% / 50% 54% 46% 50%", anim: "blobA" },
+  { time: "12:00", title: "Le service bat son plein", text: "Bo buns, burgers smashés à la minute, riz sautés — sur place ou à emporter.", image: "public/food/bo-bun.png", offset: "clamp(20px, 6vh, 62px)", radius: "44% 56% 60% 40% / 46% 44% 56% 54%", anim: "blobB" },
+  { time: "16:30", title: "L'heure du goûter", text: "Cookies maison, brioche moelleuse, latte crémeux. Le moment le plus calme.", image: "public/food/cafe-interior.png", offset: "0px", radius: "52% 48% 42% 58% / 58% 46% 54% 42%", anim: "blobA" },
+];
+
+const NOW = [
+  { until: 11, title: "Croissants du four", note: "Viennoiseries pur beurre", image: "public/food/latte.png" },
+  { until: 15, title: "Bo bun & burgers", note: "Service midi", image: "public/food/bo-bun.png" },
+  { until: 18, title: "Cookies & latte", note: "Pause goûter", image: "public/food/cafe-interior.png" },
+  { until: 24, title: "Formules du soir", note: "À emporter", image: "public/food/smash-burger.png" },
 ];
 
 const SIGNATURES = [
-  { index: "01", name: "Bo Bun poulet", desc: "Vermicelles de riz, poulet sauté, nems croustillants, cacahuètes, herbes fraîches.", price: 11.0, image: "public/food/bo-bun.png", tag: "Le préféré des habitués" },
-  { index: "02", name: "Smash Burger", desc: "Double steak smashé, cheddar fondant, sauce maison, frites fraîches.", price: 10.5, image: "public/food/smash-burger.png", tag: "Best-seller" },
-  { index: "03", name: "Loclac bœuf", desc: "Bœuf caramélisé, riz sauté à la tomate, œuf au plat — l'incontournable cambodgien.", price: 13.1, image: "public/food/loclac.png", tag: "Coup de cœur" },
-  { index: "04", name: "Poke poulet", desc: "Riz assaisonné, avocat, mangue, edamame, sauce soja sucrée.", price: 11.0, image: "public/food/poke-bowl.png", tag: "Fraîcheur" },
-  { index: "05", name: "Bánh Mì poulet", desc: "Sandwich vietnamien, poulet mariné, pickles de légumes, coriandre.", price: 5.2, image: "public/food/banh-mi.png", tag: "À emporter" },
+  { name: "Bo Bun poulet", tag: "Le préféré des habitués", price: 11.0, image: "public/food/bo-bun.png", offset: "0px", radius: "62% 38% 54% 46% / 52% 56% 44% 48%", anim: "blobA", dur: "20s" },
+  { name: "Smash Burger", tag: "Best-seller", price: 10.5, image: "public/food/smash-burger.png", offset: "clamp(18px, 5vh, 54px)", radius: "44% 56% 62% 38% / 46% 42% 58% 54%", anim: "blobB", dur: "24s" },
+  { name: "Loclac bœuf", tag: "L'incontournable cambodgien", price: 13.1, image: "public/food/loclac.png", offset: "0px", radius: "54% 46% 40% 60% / 60% 44% 56% 40%", anim: "blobA", dur: "27s" },
+  { name: "Poke poulet", tag: "Fraîcheur absolue", price: 11.0, image: "public/food/poke-bowl.png", offset: "clamp(24px, 7vh, 74px)", radius: "38% 62% 56% 44% / 44% 58% 42% 56%", anim: "blobB", dur: "22s" },
+  { name: "Bánh Mì poulet", tag: "À emporter", price: 5.2, image: "public/food/banh-mi.png", offset: "clamp(8px, 2.4vh, 26px)", radius: "58% 42% 46% 54% / 48% 52% 48% 52%", anim: "blobA", dur: "25s" },
 ];
 
 const FALLBACK_IMG = "public/food/cafe-interior.png";
@@ -580,19 +509,19 @@ const FALLBACK_IMG = "public/food/cafe-interior.png";
 const MENU = [
   { id: "asian", label: "Asian Food", items: [
     { name: "Nems poulet (3 pièces)", description: "Nems au poulet faits maison, sauce nuoc-mâm", price: 4.7, image: "public/food/banh-mi.png" },
-    { name: "Bo Bun poulet", description: "Vermicelles de riz, sauté de viande, salade, carotte, nems, cacahuètes, persil", price: 11.0, image: "public/food/bo-bun.png" },
+    { name: "Bo Bun poulet", description: "Vermicelles de riz, sauté de viande, salade, carotte, nems, cacahuètes", price: 11.0, image: "public/food/bo-bun.png" },
     { name: "Bo Bun bœuf", description: "Vermicelles de riz, bœuf sauté, crudités et sauce nuoc-mâm", price: 11.0, image: "public/food/bo-bun.png" },
     { name: "Bánh Mì poulet", description: "Sandwich vietnamien au poulet mariné, pickles, coriandre", price: 5.2, image: "public/food/banh-mi.png" },
-    { name: "Riz poulet croustillant curry coco", description: "Riz sauté, poulet frit, salade, tomate, concombre, omelette, sauce curry coco", price: 12.1, image: "public/food/poke-bowl.png" },
+    { name: "Riz poulet croustillant curry coco", description: "Riz sauté, poulet frit, crudités, omelette, sauce curry coco", price: 12.1, image: "public/food/poke-bowl.png" },
     { name: "Loclac bœuf", description: "Riz sauté à la tomate, viande caramélisée, crudités, œuf au plat", price: 13.1, image: "public/food/loclac.png" },
     { name: "Poke poulet", description: "Riz assaisonné, poulet frit, avocat, mangue, carotte, sauce soja sucrée", price: 11.0, image: "public/food/poke-bowl.png" },
     { name: "Poulet katsu", description: "Riz sauté au poulet frit, sauce mayo épicée, oignons frits", price: 12.1, image: "public/food/loclac.png" },
   ] },
   { id: "burgers", label: "Burgers", items: [
-    { name: "Smash Burger", description: "Bun brioché, double steak smashé, cheddar, sauce maison, salade, frites maison", price: 10.5, image: "public/food/smash-burger.png" },
-    { name: "Montagnard Burger", description: "Bun brioché, steak 150 g, raclette, sauce poivre, barbecue, salade, frites maison", price: 11.0, image: "public/food/smash-burger.png" },
+    { name: "Smash Burger", description: "Bun brioché, double steak smashé, cheddar, sauce maison, frites maison", price: 10.5, image: "public/food/smash-burger.png" },
+    { name: "Montagnard Burger", description: "Bun brioché, steak 150 g, raclette, sauce poivre, barbecue, frites maison", price: 11.0, image: "public/food/smash-burger.png" },
     { name: "Mix Burger", description: "Bun brioché, poulet frit, steak haché, cheddar, sauce smash, frites maison", price: 12.0, image: "public/food/smash-burger.png" },
-    { name: "Chicken Burger", description: "Bun brioché, poulet frit, cheddar, sauce smash & barbecue, cornichon, frites maison", price: 11.0, image: "public/food/smash-burger.png" },
+    { name: "Chicken Burger", description: "Bun brioché, poulet frit, cheddar, sauce smash & barbecue, frites maison", price: 11.0, image: "public/food/smash-burger.png" },
     { name: "Sandwich Américain", description: "Demi-baguette, steak haché, cheddar, tomate, frites maison", price: 8.0, image: "public/food/banh-mi.png" },
     { name: "Menu enfant", description: "Poulet frit, frites maison ou riz", price: 6.5, image: "public/food/smash-burger.png" },
     { name: "Frites maison", description: "Portion de frites fraîches, coupées le matin", price: 4.0, image: "public/food/smash-burger.png" },
@@ -645,39 +574,33 @@ const HOURS = [
 
 const clamp = (n) => Math.max(0, Math.min(1, n));
 const easeOut = (n) => 1 - Math.pow(1 - n, 3);
+const easeInOut = (n) => (n < 0.5 ? 4 * n * n * n : 1 - Math.pow(-2 * n + 2, 3) / 2);
 
 class Component extends DCLogic {
   state = { cat: 0, sent: false, now: Date.now() };
 
   componentDidMount() {
     this.reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    this.clock = setInterval(() => this.setState({ now: Date.now() }), 60000);
+    this.clock = setInterval(() => this.setState({ now: Date.now() }), 30000);
     this.boot(0);
   }
 
   boot(tries) {
     if (this.booted) return;
-    const ready = document.querySelector(".cc-film") && document.querySelector(".cc-track") && document.querySelector(".cc-rit") && document.querySelector("footer");
-    if (!ready) {
+    if (!document.querySelector(".stage") || !document.querySelector(".slot") || !document.querySelector("footer")) {
       if (tries > 240) return;
       setTimeout(() => this.boot(tries + 1), 60);
       return;
     }
     this.booted = true;
     const safe = (l, fn) => { try { fn(); } catch (e) { console.warn("[cc] " + l, e); } };
-    safe("length", () => this.applyLength());
+    safe("frames", () => this.buildFrames());
     safe("lenis", () => this.startLenis());
-    safe("loop", () => this.startLoop());
+    safe("split", () => this.splitText());
     safe("reveals", () => this.startReveals());
-    safe("pointer", () => this.startPointer());
-    safe("spark", () => this.startSpark());
-    safe("drag", () => this.startDrag());
-    safe("grain", () => {
-      if (this.props.grain === false) {
-        const g = document.querySelector(".cc-grain");
-        if (g) g.style.display = "none";
-      }
-    });
+    safe("loop", () => this.startLoop());
+    safe("pressure", () => this.startPressure());
+    safe("bounce", () => this.startBounce());
   }
 
   componentWillUnmount() {
@@ -685,269 +608,246 @@ class Component extends DCLogic {
     clearInterval(this.clock);
     if (this.lenis) { this.lenis.destroy(); window.__ccLenis = null; }
     if (this.io) this.io.disconnect();
-    if (this.ioNav) this.ioNav.disconnect();
-    if (this.onPointer) window.removeEventListener("pointermove", this.onPointer);
-    if (this.onClick) window.removeEventListener("pointerdown", this.onClick);
+    if (this.ioBounce) this.ioBounce.disconnect();
+    if (this.roBounce) this.roBounce.disconnect();
+    if (this.bcTimer) { clearInterval(this.bcTimer); this.bcTimer = null; }
+    if (this.onMove) window.removeEventListener("pointermove", this.onMove);
+    if (this.onTouchUnlock) window.removeEventListener("touchstart", this.onTouchUnlock);
   }
 
-  applyLength() {
-    const film = document.querySelector(".cc-film");
-    const n = Number(this.props.filmScroll);
-    if (film && n) film.style.height = n + "vh";
+  /* ── Film : la video prend la main des qu'elle est decodable, les stills
+        du markup assurent l'affichage d'ici la ── */
+  buildFrames() {
+    const host = document.querySelector(".frames");
+    if (!host) return;
+    this.frameEls = Array.from(host.querySelectorAll("img"));
+    const video = host.querySelector(".film-video");
+    this.filmVideo = video;
+    this.useVideo = false;
+    if (!video) return;
+
+    const activate = () => {
+      if (this.useVideo || !video.videoWidth) return;
+      this.useVideo = true;
+      video.style.opacity = "1";
+      /* on laisse le fondu de .6s se terminer avant de retirer les stills,
+         sinon un noir d'une frame apparait entre les deux */
+      setTimeout(() => { if (this.useVideo) this.frameEls.forEach((f) => (f.style.opacity = "0")); }, 620);
+      /* iOS refuse les seeks tant qu'aucune lecture n'a eu lieu : un
+         play()/pause() muet leve la restriction sans rien afficher */
+      const pr = video.play();
+      if (pr) pr.then(() => video.pause()).catch(() => {});
+    };
+    const fallback = () => {
+      this.useVideo = false;
+      video.style.opacity = "0";
+      if (this.frameEls[0]) this.frameEls[0].style.opacity = "1";
+    };
+    video.addEventListener("loadeddata", activate);
+    video.addEventListener("canplay", activate);
+    video.addEventListener("error", fallback);
+    this.onTouchUnlock = () => { if (video.paused && video.currentTime < 0.05) activate(); };
+    window.addEventListener("touchstart", this.onTouchUnlock, { once: true, passive: true });
+    video.load();
   }
 
   startLenis() {
     if (this.reduced || !window.Lenis) return;
-    const lenis = new window.Lenis({ duration: 1.1, lerp: 0.09, wheelMultiplier: 0.9, smoothWheel: true });
+    const lenis = new window.Lenis({ duration: 1.05, lerp: 0.095, wheelMultiplier: 0.92, smoothWheel: true });
     this.lenis = lenis;
     window.__ccLenis = lenis;
     const loop = (t) => { lenis.raf(t); requestAnimationFrame(loop); };
     requestAnimationFrame(loop);
   }
 
-  scrollTo(sel, offset = -1) {
+  scrollTo(sel, offset = -20) {
     const el = document.querySelector(sel);
     if (!el) return;
     const y = el.getBoundingClientRect().top + window.scrollY + offset;
-    if (window.__ccLenis) window.__ccLenis.scrollTo(y, { duration: 1.3 });
+    if (window.__ccLenis) window.__ccLenis.scrollTo(y, { duration: 1.25 });
     else window.scrollTo({ top: y, behavior: "smooth" });
   }
 
-  /* ── une seule boucle rAF : film, rituel, galerie, marquees, rail ── */
+  splitText() {
+    /* on découpe d'abord par MOTS (chaque mot en nowrap), puis par lettres à
+       l'intérieur : sinon le navigateur coupe au milieu des mots */
+    const wrap = (el, cls) => {
+      if (el.dataset.split === "1") return;
+      el.dataset.split = "1";
+      const words = el.textContent.split(/(\s+)/);
+      el.textContent = "";
+      for (const w of words) {
+        if (!w) continue;
+        if (/^\s+$/.test(w)) { el.appendChild(document.createTextNode(" ")); continue; }
+        const holder = document.createElement("span");
+        holder.style.display = "inline-block";
+        holder.style.whiteSpace = "nowrap";
+        for (const ch of w) {
+          const s = document.createElement("span");
+          s.className = cls;
+          s.textContent = ch;
+          s.style.display = "inline-block";
+          s.style.willChange = "transform";
+          holder.appendChild(s);
+        }
+        el.appendChild(holder);
+      }
+    };
+    document.querySelectorAll(".sf").forEach((el) => wrap(el, "sf-ch"));
+    document.querySelectorAll(".tp .wd").forEach((el) => wrap(el, "tp-ch"));
+  }
+
   startLoop() {
-    const film = document.querySelector(".cc-film");
-    const frames = Array.from(film.querySelectorAll(".cc-media img"));
-    const video = film.querySelector(".cc-video");
-    const media = film.querySelector(".cc-media");
-    const frame = film.querySelector(".cc-frame");
-    const chapters = Array.from(film.querySelectorAll(".cc-ch"));
-    const count = film.querySelector(".cc-count");
-    const scrub = film.querySelector(".cc-scrub");
-    const cue = film.querySelector(".cc-cue");
-    const prog = document.querySelector(".cc-prog");
-    const rail = document.querySelector(".cc-rail");
-    const rit = document.querySelector(".cc-rit");
-    const moms = Array.from(document.querySelectorAll(".cc-mom"));
-    const momImgs = Array.from(document.querySelectorAll(".cc-mom-img"));
-    const momN = document.querySelector(".cc-mom-n");
-    const momBar = document.querySelector(".cc-mom-bar");
-    const sig = document.querySelector(".cc-sig");
-    const track = document.querySelector(".cc-track");
-    const sigBar = document.querySelector(".cc-sig-bar");
-    const sigN = document.querySelector(".cc-sig-n");
-    const sigImgs = Array.from(document.querySelectorAll(".cc-sig-img img"));
-    const sigK = new Array(sigImgs.length).fill(0);
-    const marquees = Array.from(document.querySelectorAll(".cc-mq"));
-    const seal = document.querySelector(".cc-seal");
-    const word = document.querySelector(".cc-word");
+    const film = document.querySelector(".film");
+    const stage = document.querySelector(".stage");
+    const slot = document.querySelector(".slot");
+    const mac = document.querySelector(".mac");
+    const host = document.querySelector(".frames");
+    const sub = stage.querySelector(".sub");
+    const caps = Array.from(stage.querySelectorAll(".cap"));
+    const count = stage.querySelector(".count");
+    const scrub = stage.querySelector(".scrub");
+    const prog = document.querySelector(".prog");
+    const nav = document.querySelector(".nav");
+    const clockEl = document.querySelector(".clock");
+    const word = document.querySelector(".word");
+    const shots = Array.from(document.querySelectorAll(".shot img"));
+    const navLinks = Array.from(document.querySelectorAll(".nav-link"));
+    const frames = this.frameEls || [];
+    const video = this.filmVideo;
+    const nowImg = document.querySelector(".now-img");
 
-    let useVideo = false;
-    if (video) {
-      const activate = () => {
-        if (useVideo || !video.videoWidth) return;
-        useVideo = true;
-        video.style.opacity = "1";
-        frames.forEach((f) => (f.style.opacity = "0"));
-        const pr = video.play();
-        if (pr) pr.then(() => video.pause()).catch(() => {});
-      };
-      video.addEventListener("loadeddata", activate);
-      video.addEventListener("canplay", activate);
-      video.addEventListener("error", () => { useVideo = false; video.style.opacity = "0"; if (frames[0]) frames[0].style.opacity = "1"; });
-      video.load();
-    }
-
-    marquees.forEach((m) => { m.dataset.x = "0"; m.dataset.w = "0"; });
-    this.drag = { offset: 0 };
-
-    const st = { p: 0, sig: 0, rit: 0, t: 0, y: window.scrollY, vel: 0 };
-    let lastN = "", lastSigN = "", lastMomN = "";
+    const st = { p: 0, t: 0 };
+    let lastN = "", lastClock = "", lastI = -1, stageFull = false;
 
     const tick = () => {
       const now = performance.now();
       const dt = st.t ? Math.min(0.05, (now - st.t) / 1000) : 0.016;
       st.t = now;
-      /* lissage exponentiel : indépendant du framerate, convergence garantie —
-         aucune traînée ni coupure en fin de course */
-      const smooth = (cur, target, rate) => {
-        const next = cur + (target - cur) * (1 - Math.exp(-dt * rate));
-        return Math.abs(target - next) < 0.0004 ? target : next;
+      const smooth = (cur, tg, rate) => {
+        const next = cur + (tg - cur) * (1 - Math.exp(-dt * rate));
+        return Math.abs(tg - next) < 0.0004 ? tg : next;
       };
 
-      const y = window.scrollY;
-      const rawVel = (y - st.y) / (dt || 0.016);
-      st.y = y;
-      st.vel += (rawVel - st.vel) * 0.12;
-
-      /* ---------- film ---------- */
       const rect = film.getBoundingClientRect();
       const total = film.offsetHeight - window.innerHeight;
       const target = clamp(-rect.top / (total || 1));
-      st.p = this.reduced ? target : smooth(st.p, target, 15);
+      st.p = this.reduced ? target : smooth(st.p, target, 12);
       const p = clamp(st.p);
-      const vp = clamp(p / 0.93);
+      /* la lecture finit avant l'atterrissage : l'image est stable pendant le repli */
+      const vp = clamp(p / 0.78);
 
-      if (useVideo && video.readyState >= 2) {
+      /* scrub : le scroll pilote la tete de lecture. L'encodage tout-intra
+         rend le seek exact instantane, donc un seek par frame rAF est tenable
+         — surtout pas fastSeek(), qui se recale sur la keyframe la plus
+         proche. Seuil : une demi-frame @24fps. */
+      if (this.useVideo && video && video.readyState >= 2) {
         const t = vp * (video.duration || 10);
-        /* La video est encodee tout-intra (chaque frame est une keyframe) :
-           un seek exact est instantane, on peut donc en faire un par frame
-           rAF. Surtout PAS fastSeek() ici — il se cale sur la keyframe la
-           plus proche, ce qui saccade des que l'encodage a des GOP longs.
-           Seuil = demi-frame @24fps, comme sur main. */
         if (Math.abs(video.currentTime - t) > 1 / 48) {
           try { video.currentTime = t; } catch (e) {}
         }
       } else if (frames.length) {
+        /* repli : fondu croise entre les 8 stills */
         const f = vp * (frames.length - 1);
-        const i = Math.floor(f);
+        const i = Math.min(frames.length - 1, Math.floor(f));
         const mix = f - i;
-        if (this._lastFrameIdx !== i || this._lastMix !== mix) {
-          if (this._lastFrameIdx !== undefined && this._lastFrameIdx !== i && this._lastFrameIdx !== i + 1 && frames[this._lastFrameIdx]) {
-            frames[this._lastFrameIdx].style.opacity = "0";
+        if (i !== lastI) {
+          for (let n = 0; n < frames.length; n++) {
+            if (n < i - 1 || n > i + 1) { if (frames[n].style.opacity !== "0") frames[n].style.opacity = "0"; }
           }
-          if (this._lastNextIdx !== undefined && this._lastNextIdx !== i && this._lastNextIdx !== i + 1 && frames[this._lastNextIdx]) {
-            frames[this._lastNextIdx].style.opacity = "0";
-          }
-          if (frames[i]) frames[i].style.opacity = "1";
-          if (frames[i + 1]) frames[i + 1].style.opacity = mix > 0.01 ? mix.toFixed(2) : "0";
-          this._lastFrameIdx = i;
-          this._lastNextIdx = i + 1;
-          this._lastMix = mix;
+          lastI = i;
         }
+        frames[i].style.opacity = "1";
+        if (frames[i + 1]) frames[i + 1].style.opacity = String(mix);
+        if (frames[i - 1]) frames[i - 1].style.opacity = "0";
       }
 
-      const open = easeOut(clamp(p / 0.2));
-      if (frame) frame.style.clipPath = `inset(${(1 - open) * 13}vh ${(1 - open) * 17}vw round 2px)`;
-      if (media) media.style.transform = `scale(${1.1 - 0.1 * p})`;
+      /* atterrissage : plein écran → écran du portable, mesuré en direct.
+         Tant que le repli n'a pas commencé (k = 0) la scène est plein écran :
+         on ne mesure pas le slot, ce qui retire une lecture de layout par
+         frame sur les 78 % du film où elle ne sert à rien. */
+      const k = easeInOut(clamp((p - 0.78) / 0.22));
+      if (k > 0) {
+        const sr = slot.getBoundingClientRect();
+        const lerp = (a, b) => a + (b - a) * k;
+        stage.style.left = lerp(0, sr.left) + "px";
+        stage.style.top = lerp(0, sr.top) + "px";
+        stage.style.width = lerp(window.innerWidth, sr.width) + "px";
+        stage.style.height = lerp(window.innerHeight, sr.height) + "px";
+        stage.style.borderRadius = lerp(0, 13) + "px";
+        stageFull = false;
+      } else if (!stageFull) {
+        stage.style.left = "0px";
+        stage.style.top = "0px";
+        stage.style.width = "100vw";
+        stage.style.height = "100vh";
+        stage.style.borderRadius = "0px";
+        stageFull = true;
+      }
+      if (host) host.style.transform = `scale(${1.05 - 0.05 * vp})`;
+      if (mac) mac.style.opacity = String(clamp((k - 0.3) / 0.4));
+      if (sub) sub.style.opacity = String(1 - clamp(k / 0.32));
 
-      chapters.forEach((el, i) => {
-        const a = 0.06 + i * 0.3;
-        const o = clamp((p - a) / 0.08) * clamp((a + 0.26 - p) / 0.09);
-        const shown = i === 0 ? Math.max(o, clamp((0.1 - p) / 0.1)) : o;
+      caps.forEach((el, i) => {
+        const a = 0.03 + i * 0.25;
+        const o = clamp((p - a) / 0.06) * clamp((a + 0.23 - p) / 0.07);
+        const shown = i === 0 ? Math.max(o, clamp((0.08 - p) / 0.08)) : o;
         el.style.opacity = String(shown);
-        el.style.transform = `translateY(${(1 - shown) * 22}px)`;
+        el.style.transform = `translateY(${(1 - shown) * 14}px)`;
       });
-      const n = String(Math.min(3, Math.floor(p * 3) + 1)).padStart(2, "0");
+      const n = String(Math.min(3, Math.floor(vp * 3) + 1)).padStart(2, "0");
       if (count && n !== lastN) { count.textContent = n; lastN = n; }
-      if (scrub) scrub.style.transform = `scaleY(${p})`;
-      if (cue) cue.style.opacity = String(clamp(1 - p / 0.05));
+      if (scrub) scrub.style.transform = `scaleX(${vp})`;
 
       const doc = document.documentElement.scrollHeight - window.innerHeight;
-      const gp = clamp(y / (doc || 1));
-      if (prog) prog.style.transform = `scaleX(${gp})`;
+      if (prog) prog.style.transform = `scaleX(${clamp(window.scrollY / (doc || 1))})`;
 
-      const past = p > 0.97 || rect.top < -total;
-      const nav = document.querySelector(".cc-nav");
       if (nav) {
-        nav.style.opacity = past ? "1" : "0";
-        nav.style.transform = past ? "translateY(0)" : "translateY(-24px)";
-        nav.style.pointerEvents = past ? "auto" : "none";
-        nav.style.backgroundColor = past ? "rgba(251,244,236,.82)" : "rgba(251,244,236,0)";
-        nav.style.borderBottomColor = past ? "rgba(60,42,28,.12)" : "rgba(60,42,28,0)";
+        const on = k > 0.9;
+        nav.style.opacity = on ? "1" : "0";
+        nav.style.pointerEvents = on ? "auto" : "none";
+        nav.style.transform = on ? "translate(-50%,0)" : "translate(-50%,-22px)";
       }
-      if (rail) rail.style.opacity = past ? "1" : "0";
 
-      /* ---------- rituel ---------- */
-      if (rit && moms.length) {
-        const r = rit.getBoundingClientRect();
-        const tot = rit.offsetHeight - window.innerHeight;
-        const tp = clamp(-r.top / (tot || 1));
-        st.rit = this.reduced ? tp : smooth(st.rit, tp, 9);
-        const k = st.rit * moms.length;
-        moms.forEach((el, i) => {
-          const d = Math.max(0, 1 - Math.abs(k - (i + 0.5)) * 1.6);
-          el.style.opacity = String(d);
-          el.style.transform = `translateY(${(1 - d) * 34}px)`;
-          el.style.position = i === 0 ? "relative" : "absolute";
-          if (i > 0) { el.style.inset = "0"; }
-          el.style.pointerEvents = d > 0.5 ? "auto" : "none";
+      if (nowImg && this.nowSrc && !nowImg.src.endsWith(this.nowSrc)) nowImg.src = this.nowSrc;
+
+      /* les <img> des listes portent leur URL en data-src : un src en {{ hole }}
+         ferait requêter le texte du trou pendant le streaming */
+      if (now - (this.lastImgSync || 0) > 200) {
+        this.lastImgSync = now;
+        document.querySelectorAll("img.li[data-src]").forEach((im) => {
+          const src = im.dataset.src;
+          if (src && src.charAt(0) !== "{" && !im.src.endsWith(src)) im.src = src;
         });
-        momImgs.forEach((el, i) => {
-          const d = Math.max(0, 1 - Math.abs(k - (i + 0.5)) * 1.6);
-          el.style.opacity = String(d);
-          el.style.transform = `scale(${1.04 + (1 - d) * 0.06}) translateY(${(1 - d) * 3}%)`;
-        });
-        const mn = String(Math.min(3, Math.floor(st.rit * 3) + 1)).padStart(2, "0");
-        if (momN && mn !== lastMomN) { momN.textContent = mn; lastMomN = mn; }
-        if (momBar) momBar.style.transform = `scaleX(${tp})`;
       }
 
-      /* ---------- galerie horizontale (scroll + drag) ---------- */
-      if (sig && track) {
-        const r = sig.getBoundingClientRect();
-        const tot = sig.offsetHeight - window.innerHeight;
-        const tp = clamp(-r.top / (tot || 1));
-        st.sig = this.reduced ? tp : smooth(st.sig, tp, 10);
-        const amount = Math.max(0, track.scrollWidth - window.innerWidth);
-        const x = -st.sig * amount + this.drag.offset;
-        const skew = this.reduced ? 0 : Math.max(-6, Math.min(6, -st.vel * 0.012));
-        track.style.transform = `translate3d(${x}px,0,0) skewX(${skew}deg)`;
-        if (sigBar) sigBar.style.transform = `scaleX(${tp})`;
-        const sn = String(Math.min(5, Math.floor(tp * 5) + 1)).padStart(2, "0");
-        if (sigN && sn !== lastSigN) { sigN.textContent = sn; lastSigN = sn; }
-        /* toutes les lectures de rect AVANT la moindre ecriture : sinon
-           chaque iteration force un recalcul de layout (7 reflows/frame) */
-        const vw = window.innerWidth || 1;
-        for (let i = 0; i < sigImgs.length; i++) {
-          const ir = sigImgs[i].getBoundingClientRect();
-          sigK[i] = (ir.left + ir.width / 2 - vw / 2) / vw;
-        }
-        for (let i = 0; i < sigImgs.length; i++) {
-          sigImgs[i].style.transform = `scale(1.14) translateX(${(-sigK[i] * 3).toFixed(2)}%)`;
-        }
+      if (clockEl) {
+        const d = new Date();
+        const s = String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
+        if (s !== lastClock) { clockEl.textContent = s; lastClock = s; }
       }
 
-      /* ---------- marquees : vitesse + direction liées au scroll ---------- */
-      marquees.forEach((m) => {
-        const dir = Number(m.dataset.dir || -1);
-        let w = Number(m.dataset.w);
-        if (!w) { w = m.scrollWidth / 2; m.dataset.w = String(w); }
-        let x = Number(m.dataset.x);
-        const speed = (28 + Math.min(700, Math.abs(st.vel)) * 0.55) * dir;
-        x += speed * dt;
-        if (w > 0) { if (x <= -w) x += w; if (x >= 0) x -= w; }
-        m.dataset.x = String(x);
-        m.style.transform = `translate3d(${x}px,0,0)`;
+      shots.forEach((img) => {
+        const r = img.getBoundingClientRect();
+        if (r.bottom < -200 || r.top > window.innerHeight + 200) return;
+        const kk = (r.top + r.height / 2 - window.innerHeight / 2) / window.innerHeight;
+        img.style.transform = `translateY(${(-kk * 4).toFixed(2)}%) scale(1.09)`;
       });
 
-      if (seal) seal.style.transform = `rotate(${y * 0.05}deg)`;
       if (word) {
         const wr = word.getBoundingClientRect();
         const kk = clamp((window.innerHeight - wr.top) / (window.innerHeight || 1));
-        word.style.transform = `translateX(${(1 - kk) * -8}%) scale(${0.96 + kk * 0.04})`;
+        word.style.transform = `translateX(${(1 - kk) * -6}%)`;
       }
 
-      /* rail actif — le DOM est resolu une fois (le template peut le
-         re-rendre : on reconstruit si les noeuds sont detaches), les
-         lectures sont groupees, et on n'ecrit que sur changement d'etat.
-         Avant : 3 querySelector + 1 reflow force PAR item et PAR frame. */
-      if (rail) {
-        if (!this._rail || !this._rail.length || !this._rail[0].b.isConnected) {
-          this._rail = Array.from(rail.querySelectorAll(".cc-rail-item")).map((b) => ({
-            b,
-            sec: document.querySelector(b.dataset.target),
-            tickEl: b.querySelector(".cc-rail-tick"),
-            numEl: b.querySelector(".cc-rail-num"),
-            labEl: b.querySelector(".cc-rail-label"),
-            on: null,
-            next: null,
-          }));
-        }
-        const mid = (window.innerHeight || 1) * 0.5;
-        for (const it of this._rail) {
-          if (!it.sec) continue;
-          const sr = it.sec.getBoundingClientRect();
-          it.next = sr.top <= mid && sr.bottom >= mid;
-        }
-        for (const it of this._rail) {
-          if (!it.sec || it.next === it.on) continue;
-          it.on = it.next;
-          const on = it.on;
-          if (it.tickEl) { it.tickEl.style.width = on ? "26px" : "13px"; it.tickEl.style.backgroundColor = on ? "#b4813f" : "rgba(46,33,23,.3)"; }
-          if (it.numEl) it.numEl.style.color = on ? "#241a11" : "rgba(46,33,23,.35)";
-          if (it.labEl) { it.labEl.style.opacity = on ? "1" : "0"; it.labEl.style.transform = on ? "translateX(0)" : "translateX(-5px)"; }
-        }
-      }
+      navLinks.forEach((b) => {
+        const sec = document.querySelector(b.dataset.target);
+        if (!sec) return;
+        const r = sec.getBoundingClientRect();
+        const on = r.top <= window.innerHeight * 0.45 && r.bottom >= window.innerHeight * 0.45;
+        b.style.color = on ? "#241a11" : "rgba(46,33,23,.55)";
+        b.style.backgroundColor = on ? "rgba(27,18,9,.08)" : "transparent";
+      });
 
       if (this.sweep && now - (this.lastSweep || 0) > 120) { this.lastSweep = now; this.sweep(); }
 
@@ -956,37 +856,46 @@ class Component extends DCLogic {
     this.raf = requestAnimationFrame(tick);
   }
 
-  /* ── révélations : IntersectionObserver + transitions CSS ── */
   startReveals() {
+    if (this.reduced) return;
     const ease = "cubic-bezier(.16,1,.3,1)";
     const items = Array.from(document.querySelectorAll(".rv"));
     const words = Array.from(document.querySelectorAll(".wd"));
-    const photos = Array.from(document.querySelectorAll(".cc-portrait, .cc-wide"));
-    const nums = Array.from(document.querySelectorAll(".cc-num"));
-    if (this.reduced) return;
+    const floats = Array.from(document.querySelectorAll(".sf"));
+    const nums = Array.from(document.querySelectorAll(".num"));
+    const all = [...items, ...words, ...floats, ...nums];
+    const below = (el) => el.getBoundingClientRect().top > window.innerHeight * 0.88;
 
     items.forEach((el) => {
+      if (!below(el)) return;
+      el.dataset.hid = "1";
       el.style.opacity = "0";
-      el.style.transform = "translateY(24px)";
-      el.style.transition = `opacity .9s ${ease}, transform 1s ${ease}`;
+      el.style.transform = "translateY(22px)";
+      el.style.transition = `opacity .85s ${ease}, transform .95s ${ease}`;
     });
     words.forEach((el) => {
+      if (!below(el)) { el.dataset.shown = "1"; return; }
+      el.dataset.hid = "1";
       el.style.transform = "translateY(104%)";
-      el.style.transition = `transform 1.05s ${ease}`;
+      el.style.transition = `transform 1s ${ease}`;
     });
-    photos.forEach((el) => {
-      el.style.clipPath = "inset(12% 0% 0% 0%)";
-      el.style.transition = `clip-path 1.3s ${ease}`;
+    floats.forEach((el) => {
+      if (!below(el)) { el.dataset.shown = "1"; return; }
+      el.dataset.hid = "1";
+      Array.from(el.querySelectorAll(".sf-ch")).forEach((ch, i) => {
+        ch.style.transform = "translateY(60%) rotate(3deg)";
+        ch.style.opacity = "0";
+        ch.style.transition = `transform .9s ${ease} ${i * 0.016}s, opacity .7s ease ${i * 0.016}s`;
+      });
     });
 
-    /* mot par mot : le délai suit l'ordre dans le titre parent */
     const groups = new Map();
     words.forEach((el) => {
       const key = el.closest("h1, h2, h3, blockquote") || el.parentElement;
       if (!groups.has(key)) groups.set(key, []);
       groups.get(key).push(el);
     });
-    groups.forEach((list) => list.forEach((el, i) => { el.dataset.delay = String(i * 0.055); }));
+    groups.forEach((list) => list.forEach((el, i) => { el.dataset.delay = String(i * 0.07); }));
 
     const countUp = (el) => {
       const to = parseFloat(el.dataset.to || "0");
@@ -994,10 +903,10 @@ class Component extends DCLogic {
       const suffix = el.dataset.suffix || "";
       const t0 = performance.now();
       const step = () => {
-        const k = Math.min(1, (performance.now() - t0) / 1300);
-        const v = to * easeOut(k);
+        const kk = Math.min(1, (performance.now() - t0) / 1200);
+        const v = to * easeOut(kk);
         el.textContent = (dec ? v.toFixed(dec) : Math.round(v)).toString().replace(".", ",") + suffix;
-        if (k < 1) requestAnimationFrame(step);
+        if (kk < 1) requestAnimationFrame(step);
       };
       requestAnimationFrame(step);
     };
@@ -1005,293 +914,242 @@ class Component extends DCLogic {
     const show = (el) => {
       if (el.dataset.shown === "1") return;
       el.dataset.shown = "1";
-      if (photos.includes(el)) { el.style.clipPath = "inset(0% 0% 0% 0%)"; return; }
+      if (nums.includes(el)) { countUp(el); return; }
+      if (el.dataset.hid !== "1") return;
+      if (floats.includes(el)) {
+        Array.from(el.querySelectorAll(".sf-ch")).forEach((ch) => { ch.style.transform = "translateY(0) rotate(0deg)"; ch.style.opacity = "1"; });
+        return;
+      }
       if (words.includes(el)) {
         el.style.transitionDelay = (el.dataset.delay || 0) + "s";
         el.style.transform = "translateY(0)";
         return;
       }
-      if (nums.includes(el)) { countUp(el); return; }
       el.style.opacity = "1";
       el.style.transform = "translateY(0)";
     };
 
     this.io = new IntersectionObserver((entries) => {
       entries.forEach((e) => { if (e.isIntersecting) { show(e.target); this.io.unobserve(e.target); } });
-    }, { rootMargin: "0px 0px -10% 0px", threshold: 0.04 });
-    [...items, ...words, ...photos, ...nums].forEach((el) => { if (el) this.io.observe(el); });
+    }, { rootMargin: "0px 0px -8% 0px", threshold: 0.03 });
+    all.forEach((el) => this.io.observe(el));
 
-    /* Filet indispensable : l'IO ne déclenche pas sur ce qui a été « sauté »
-       (scroll lissé, saut de rail, rechargement en cours de page). On balaie
-       donc en continu tout ce qui est entré dans le cadre et pas encore révélé. */
-    this.pending = [...items, ...words, ...photos, ...nums].filter(Boolean);
+    this.pending = all.slice();
     this.sweep = () => {
       if (!this.pending.length) return;
       const rest = [];
       for (const el of this.pending) {
         if (el.dataset.shown === "1") continue;
-        const r = el.getBoundingClientRect();
-        if (r.top < window.innerHeight * 0.92) { show(el); this.io.unobserve(el); }
+        if (el.getBoundingClientRect().top < window.innerHeight * 0.92) { show(el); this.io.unobserve(el); }
         else rest.push(el);
       }
       this.pending = rest;
     };
     this.sweep();
-
-    const imgs = photos.map((p) => p.querySelector("img")).filter(Boolean);
-    if (imgs.length) {
-      const par = () => {
-        imgs.forEach((img) => {
-          const r = img.getBoundingClientRect();
-          const k = (r.top + r.height / 2 - window.innerHeight / 2) / window.innerHeight;
-          img.style.transform = `translateY(${(-k * 4).toFixed(2)}%) scale(1.1)`;
-        });
-        requestAnimationFrame(par);
-      };
-      requestAnimationFrame(par);
-    }
-
-    const sections = LINKS.map((l) => document.querySelector(l.href)).filter(Boolean);
-    this.ioNav = new IntersectionObserver((entries) => {
-      entries.forEach((e) => {
-        if (!e.isIntersecting) return;
-        document.querySelectorAll(".cc-nav-link").forEach((b) => {
-          const on = b.dataset.target === "#" + e.target.id;
-          b.style.color = on ? "#241a11" : "rgba(46,33,23,.5)";
-          b.style.borderBottomColor = on ? "#b4813f" : "transparent";
-        });
-      });
-    }, { rootMargin: "-45% 0px -50% 0px" });
-    sections.forEach((s) => this.ioNav.observe(s));
   }
 
-  /* ── curseur : anneau réactif, aimantation des boutons, aperçu des plats ── */
-  startPointer() {
-    if (window.matchMedia("(hover: none)").matches) return;
-    const ring = document.querySelector(".cc-ring");
-    const peek = document.querySelector(".cc-peek");
-    const peekImg = document.querySelector(".cc-peek-img");
-    const rows = document.querySelector(".cc-rows");
-    const usePeek = this.props.cursorPreview !== false;
-    const pos = { x: 0, y: 0, rx: 0, ry: 0, px: 0, py: 0, on: false };
-    let src = "";
-    const mags = Array.from(document.querySelectorAll(".mg"));
+  /* ── éventail de cartes : entrée élastique en cascade, survol qui redresse la
+        carte visée et écarte ses voisines. Offsets calculés depuis la largeur
+        réelle des cartes, donc responsive (l'original travaille en px fixes). ── */
+  startBounce() {
+    const zone = document.querySelector(".bc");
+    if (!zone) return;
+    const cards = Array.from(zone.querySelectorAll(".bc-card"));
+    if (!cards.length) return;
+    const ROT = [8, -4, 2, -6, 5];
+    const SLOT = [-1.72, -0.86, 0, 0.86, 1.72];
+    const nameEl = document.querySelector(".bc-name");
+    const tagEl = document.querySelector(".bc-tag");
+    const priceEl = document.querySelector(".bc-price");
+    const EASE = "cubic-bezier(.34,1.56,.64,1)";
 
-    this.onPointer = (e) => {
-      pos.x = e.clientX;
-      pos.y = e.clientY;
-      if (ring) ring.style.opacity = "1";
+    const base = (i) => {
+      const w = cards[i].offsetWidth || 200;
+      const room = (zone.clientWidth - w) / 2;
+      const tx = Math.max(-room, Math.min(room, SLOT[i % SLOT.length] * w * 0.78));
+      return { rot: ROT[i % ROT.length], tx };
+    };
 
-      const row = usePeek && rows && e.target.closest ? e.target.closest(".cc-row") : null;
-      if (row) {
-        const next = row.dataset.img;
-        if (next && next !== src) { src = next; if (peekImg) peekImg.src = next; }
-        pos.px = e.clientX + 26;
-        pos.py = e.clientY - 112;
-        if (!pos.on) { pos.on = true; if (peek) peek.style.opacity = "1"; }
-        Array.from(rows.querySelectorAll(".cc-row")).forEach((r) => {
-          r.style.opacity = r === row ? "1" : "0.38";
-          r.style.transform = r === row ? "translateX(8px)" : "translateX(0)";
-        });
-      } else if (pos.on) {
-        pos.on = false;
-        if (peek) peek.style.opacity = "0";
-        if (rows) Array.from(rows.querySelectorAll(".cc-row")).forEach((r) => { r.style.opacity = "1"; r.style.transform = "translateX(0)"; });
-      }
+    const put = (i, rot, tx, scale) => {
+      cards[i].style.transform = `translateX(${tx}px) rotate(${rot}deg) scale(${scale})`;
+    };
 
-      /* aimantation : le bouton vient légèrement au curseur */
-      let near = false;
-      mags.forEach((el) => {
-        const r = el.getBoundingClientRect();
-        const cx = r.left + r.width / 2;
-        const cy = r.top + r.height / 2;
-        const dx = e.clientX - cx;
-        const dy = e.clientY - cy;
-        const d = Math.hypot(dx, dy);
-        const reach = Math.max(r.width, r.height) * 0.9 + 40;
-        if (d < reach) {
-          const k = 1 - d / reach;
-          el.style.transform = `translate(${dx * 0.16 * k}px, ${dy * 0.2 * k}px)`;
-          if (d < reach * 0.6) near = true;
-        } else el.style.transform = "translate(0,0)";
+    const layout = (scale) => {
+      cards.forEach((c, i) => {
+        const b = base(i);
+        c.style.zIndex = String(10 + i);
+        put(i, b.rot, b.tx, scale);
       });
-      if (ring) {
-        const big = near || !!row;
-        ring.style.width = big ? "56px" : "32px";
-        ring.style.height = big ? "56px" : "32px";
-        ring.style.margin = big ? "-28px 0 0 -28px" : "-16px 0 0 -16px";
-        ring.style.backgroundColor = big ? "rgba(180,129,63,.12)" : "transparent";
-        ring.style.borderColor = big ? "rgba(180,129,63,.8)" : "rgba(180,129,63,.5)";
-      }
     };
-    window.addEventListener("pointermove", this.onPointer, { passive: true });
 
-    const follow = () => {
-      pos.rx += (pos.x - pos.rx) * 0.2;
-      pos.ry += (pos.y - pos.ry) * 0.2;
-      if (ring) ring.style.transform = `translate3d(${pos.rx}px,${pos.ry}px,0)`;
-      if (peek) {
-        const cx = pos.on ? pos.px : pos.px;
-        peek.style.transform = `translate3d(${cx}px,${pos.py}px,0) scale(${pos.on ? 1 : 0.94})`;
-      }
-      requestAnimationFrame(follow);
-    };
-    requestAnimationFrame(follow);
-  }
+    cards.forEach((c) => { c.style.transition = `transform .55s ${EASE}`; });
+    layout(0);
 
-  /* ── étincelles au clic (façon ClickSpark) ── */
-  startSpark() {
-    const canvas = document.querySelector(".cc-spark");
-    if (!canvas || this.reduced) return;
-    const ctx = canvas.getContext("2d");
-    const dpr = Math.min(2, window.devicePixelRatio || 1);
-    const size = () => {
-      canvas.width = window.innerWidth * dpr;
-      canvas.height = window.innerHeight * dpr;
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    };
-    size();
-    window.addEventListener("resize", size);
-    let sparks = [];
-    this.onClick = (e) => {
-      const t = performance.now();
-      for (let i = 0; i < 9; i++) sparks.push({ x: e.clientX, y: e.clientY, a: (Math.PI * 2 * i) / 9, t0: t });
-    };
-    window.addEventListener("pointerdown", this.onClick, { passive: true });
-    let sparkRaf = null;
-    const draw = () => {
-      if (!sparks.length) {
-        ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
-        sparkRaf = null;
-        return;
-      }
-      const now = performance.now();
-      ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
-      sparks = sparks.filter((s) => {
-        const k = (now - s.t0) / 460;
-        if (k >= 1) return false;
-        const e = k * (2 - k);
-        const d = e * 22;
-        const len = 11 * (1 - e);
-        ctx.strokeStyle = `rgba(180,129,63,${(1 - k).toFixed(3)})`;
-        ctx.lineWidth = 1.4;
-        ctx.beginPath();
-        ctx.moveTo(s.x + d * Math.cos(s.a), s.y + d * Math.sin(s.a));
-        ctx.lineTo(s.x + (d + len) * Math.cos(s.a), s.y + (d + len) * Math.sin(s.a));
-        ctx.stroke();
-        return true;
+    let shown = false;
+    this.bcIndex = 0;
+    const reveal = () => {
+      if (shown) return;
+      shown = true;
+      cards.forEach((c, i) => {
+        setTimeout(() => {
+          const b = base(i);
+          put(i, b.rot, b.tx, 1);
+          /* une fois les cinq posees, on met la premiere en avant :
+             le libelle n'est jamais vide */
+          if (i === cards.length - 1) setTimeout(() => focus(0), 260);
+        }, 90 + i * 80);
       });
-      if (sparks.length > 0) {
-        sparkRaf = requestAnimationFrame(draw);
-      } else {
-        sparkRaf = null;
-      }
     };
-    const origOnClick = this.onClick;
-    this.onClick = (e) => {
-      if (origOnClick) origOnClick(e);
-      if (!sparkRaf) sparkRaf = requestAnimationFrame(draw);
-    };
-  }
 
-  /* ── glisser la galerie à la souris / au doigt ── */
-  startDrag() {
-    const vp = document.querySelector(".cc-viewport");
-    const track = document.querySelector(".cc-track");
-    if (!vp || !track || !this.drag) return;
-    let dragging = false;
-    let x0 = 0;
-    let base = 0;
-    const max = () => Math.max(0, track.scrollWidth - window.innerWidth);
-    vp.addEventListener("pointerdown", (e) => {
-      dragging = true;
-      x0 = e.clientX;
-      base = this.drag.offset;
-      vp.style.cursor = "grabbing";
-      vp.setPointerCapture(e.pointerId);
+    const io = new IntersectionObserver((es) => {
+      if (es[0].isIntersecting) { reveal(); io.disconnect(); }
+    }, { threshold: 0.15 });
+    io.observe(zone);
+    if (zone.getBoundingClientRect().top < window.innerHeight) reveal();
+
+    const setLabel = (c) => {
+      if (!nameEl) return;
+      nameEl.textContent = c ? c.dataset.name : "";
+      if (tagEl) tagEl.textContent = c ? c.dataset.tag : "";
+      if (priceEl) priceEl.textContent = c ? c.dataset.price : "";
+    };
+
+    /* Mettre une carte en avant : elle se redresse et passe devant, les
+       autres s'ecartent pour la degager. */
+    const focus = (i) => {
+      if (!shown) return;
+      this.bcIndex = i;
+      setLabel(cards[i]);
+      cards.forEach((c, n) => {
+        const b = base(n);
+        c.style.zIndex = String(n === i ? 40 : 10 + n);
+        if (n === i) { put(n, 0, b.tx, 1.08); return; }
+        const push = (n < i ? -1 : 1) * (c.offsetWidth || 200) * 0.5;
+        put(n, b.rot, b.tx + push, 0.96);
+      });
+    };
+
+    /* Le survol ne suffit pas : au doigt il n'existe pas, et la section
+       restait alors muette (cinq vignettes empilees et "Survolez une carte").
+       Le deck defile donc tout seul, et le survol ou l'appui reprend la main.
+       Le defilement ne tourne que quand la section est a l'ecran. */
+    let hovering = false, visible = false;
+    const advance = () => {
+      if (hovering || !visible || !shown) return;
+      focus((this.bcIndex + 1) % cards.length);
+    };
+    const startCycle = () => { if (!this.bcTimer) this.bcTimer = setInterval(advance, 2600); };
+    const stopCycle = () => { clearInterval(this.bcTimer); this.bcTimer = null; };
+
+    cards.forEach((card, i) => {
+      card.addEventListener("pointerenter", () => { hovering = true; focus(i); });
+      /* pointerdown couvre l'appui tactile, que pointerenter ne declenche pas */
+      card.addEventListener("pointerdown", () => { focus(i); });
     });
-    vp.addEventListener("pointermove", (e) => {
-      if (!dragging) return;
-      const d = e.clientX - x0;
-      this.drag.offset = Math.max(-max(), Math.min(max(), base + d));
+
+    zone.addEventListener("pointerleave", () => { hovering = false; });
+
+    const ioVis = new IntersectionObserver((es) => {
+      visible = es[0].isIntersecting;
+      if (visible) startCycle(); else stopCycle();
+    }, { threshold: 0.2 });
+    ioVis.observe(zone);
+    this.ioBounce = ioVis;
+
+    this.roBounce = new ResizeObserver(() => {
+      if (!shown) return;
+      /* on recalcule sans perdre la carte mise en avant */
+      if (this.bcIndex >= 0) focus(this.bcIndex); else layout(1);
     });
-    const end = () => {
-      if (!dragging) return;
-      dragging = false;
-      vp.style.cursor = "grab";
-      const t0 = performance.now();
-      const from = this.drag.offset;
-      const back = () => {
-        const k = Math.min(1, (performance.now() - t0) / 700);
-        this.drag.offset = from * (1 - easeOut(k));
-        if (k < 1) requestAnimationFrame(back);
-      };
-      requestAnimationFrame(back);
+    this.roBounce.observe(zone);
+  }
+
+  startPressure() {
+    if (this.reduced || window.matchMedia("(hover: none)").matches) return;
+    const chars = Array.from(document.querySelectorAll(".tp-ch"));
+    if (!chars.length) return;
+    chars.forEach((c) => { c.style.transition = "font-weight .25s ease, transform .35s cubic-bezier(.16,1,.3,1)"; });
+    let raf = 0;
+    const pos = { x: -9999, y: -9999 };
+    const apply = () => {
+      raf = 0;
+      chars.forEach((c) => {
+        const r = c.getBoundingClientRect();
+        if (r.bottom < 0 || r.top > window.innerHeight) return;
+        const d = Math.hypot(pos.x - (r.left + r.width / 2), pos.y - (r.top + r.height / 2));
+        const reach = 260;
+        const kk = d > reach ? 0 : 1 - d / reach;
+        c.style.fontWeight = String(Math.round(400 + kk * 400));
+        c.style.transform = `translateY(${(-kk * 5).toFixed(1)}px)`;
+      });
     };
-    vp.addEventListener("pointerup", end);
-    vp.addEventListener("pointercancel", end);
-    vp.addEventListener("pointerleave", end);
+    this.onMove = (e) => { pos.x = e.clientX; pos.y = e.clientY; if (!raf) raf = requestAnimationFrame(apply); };
+    window.addEventListener("pointermove", this.onMove, { passive: true });
   }
 
   status() {
     const d = new Date(this.state.now);
     const row = HOURS.find((h) => h.jsDay === d.getDay());
-    if (!row || row.open === null) return { open: false, short: "Fermé", long: "Fermé aujourd'hui — ouvert demain", color: "#b5453a" };
+    if (!row || row.open === null) return { short: "Fermé", color: "#b5453a" };
     const h = d.getHours() + d.getMinutes() / 60;
-    if (h < row.open) return { open: false, short: "Ouvre bientôt", long: "Ouvre aujourd'hui à " + row.hours.split(" – ")[0], color: "#d9a868" };
-    if (h >= row.close) return { open: false, short: "Fermé", long: "Fermé — réouverture demain matin", color: "#b5453a" };
-    return { open: true, short: "Ouvert", long: "Ouvert maintenant — jusqu'à " + row.hours.split(" – ")[1], color: "#5a8a5a" };
+    if (h < row.open) return { short: "Ouvre à " + row.hours.split(" – ")[0], color: "#d9a868" };
+    if (h >= row.close) return { short: "Fermé", color: "#b5453a" };
+    return { short: "Ouvert jusqu'à " + row.hours.split(" – ")[1], color: "#7ea36a" };
   }
 
   renderVals() {
     const cat = MENU[this.state.cat];
-    const today = new Date(this.state.now).getDay();
+    const d = new Date(this.state.now);
+    const today = d.getDay();
     const st = this.status();
+    const nowItem = NOW.find((x) => d.getHours() < x.until) || NOW[NOW.length - 1];
+    this.nowSrc = nowItem.image;
     return {
-      links: LINKS.map((l) => ({ ...l, go: () => this.scrollTo(l.href, -70) })),
-      rail: RAIL.map((r) => ({ ...r, go: () => this.scrollTo(r.href, r.href === "#film" ? 0 : -70) })),
+      nav: NAV.map((n) => ({ ...n, go: () => this.scrollTo(n.href, -20) })),
+      chapters: CHAPTERS,
       moments: MOMENTS,
-      marquee: ["Fait maison", "·", "Saveurs asiatiques", "·", "Burgers smashés", "·", "Salades fraîches", "·", "Viennoiseries", "·", "Fait maison", "·", "Saveurs asiatiques", "·", "Burgers smashés", "·", "Salades fraîches", "·", "Viennoiseries", "·"],
-      marqueeB: ["Sur place ou à emporter", "Service traiteur", "Café de spécialité", "Produits frais du matin", "Moissy-Cramayel", "Devis sous 24 h", "Sur place ou à emporter", "Service traiteur", "Café de spécialité", "Produits frais du matin", "Moissy-Cramayel", "Devis sous 24 h"],
-      goTop: () => this.scrollTo("#film", 0),
-      goCarte: () => this.scrollTo("#carte", -70),
-      goTraiteur: () => this.scrollTo("#traiteur", -70),
-      goDevis: () => {
-        const input = document.querySelector(".cc-subject");
-        if (input) input.value = "Traiteur — demande de devis";
-        this.scrollTo("#contact", -70);
-      },
       statusShort: st.short,
-      statusLong: st.long,
       statusColor: st.color,
+      nowTitle: nowItem.title,
+      nowNote: nowItem.note,
+      goTop: () => this.scrollTo("#film", 0),
+      goCarte: () => this.scrollTo("#carte", -20),
+      goTraiteur: () => this.scrollTo("#traiteur", -20),
+      goDevis: () => {
+        const input = document.querySelector(".subject");
+        if (input) input.value = "Traiteur — demande de devis";
+        this.scrollTo("#contact", -20);
+      },
       stats: [
         { value: "4,9", to: "4.9", dec: "1", suffix: "", label: "Note Google" },
         { value: "240+", to: "240", dec: "0", suffix: "+", label: "Avis clients" },
-        { value: "75+", to: "75", dec: "0", suffix: "+", label: "Spécialités maison" },
+        { value: "75+", to: "75", dec: "0", suffix: "+", label: "Spécialités" },
       ],
-      signatures: SIGNATURES.map((d) => ({ ...d, price: fmt(d.price) })),
+      signatures: SIGNATURES.map((s) => ({ ...s, price: fmt(s.price) })),
       categories: MENU.map((c, i) => ({
         label: c.label,
         count: String(c.items.length).padStart(2, "0"),
         selected: i === this.state.cat ? "true" : "false",
-        color: i === this.state.cat ? "#241a11" : "rgba(46,33,23,.5)",
-        dim: i === this.state.cat ? "#b4813f" : "rgba(46,33,23,.3)",
-        rule: i === this.state.cat ? "#241a11" : "rgba(60,42,28,.12)",
+        bg: i === this.state.cat ? "#1b1209" : "transparent",
+        color: i === this.state.cat ? "#fff3e2" : "rgba(46,33,23,.65)",
+        border: i === this.state.cat ? "#1b1209" : "rgba(27,18,9,.18)",
+        dim: i === this.state.cat ? "rgba(255,243,226,.5)" : "rgba(46,33,23,.35)",
         select: () => this.setState({ cat: i }),
       })),
-      items: cat.items.map((it, i) => ({ ...it, num: String(i + 1).padStart(2, "0"), price: fmt(it.price) })),
+      items: cat.items.map((it) => ({ ...it, price: fmt(it.price) })),
       offres: [
         { num: "01", title: "Anniversaires", text: "Buffets sucrés et salés, portions généreuses, dressage soigné." },
         { num: "02", title: "Mariages", text: "Cocktails, buffets, repas assis — un menu construit avec vous." },
         { num: "03", title: "Entreprises", text: "Séminaires, réunions, plateaux-repas : formules simples et ponctuelles." },
       ],
-      garanties: ["Devis gratuit sous 24 h", "Produits frais et faits maison", "Menu personnalisable", "Livraison et installation"],
+      garanties: ["Devis sous 24 h", "Fait maison", "Menu personnalisable", "Livraison incluse"],
       reviews: REVIEWS.map((r, i) => ({ ...r, num: "0" + (i + 1) })),
       hours: HOURS.map((h) => ({
         day: h.day,
         hours: h.hours,
         today: h.jsDay === today ? "aujourd'hui" : "",
-        color: h.hours === "Fermé" ? "rgba(46,33,23,.4)" : "#241a11",
+        bg: h.jsDay === today ? "rgba(180,129,63,.14)" : "transparent",
+        color: h.hours === "Fermé" ? "rgba(46,33,23,.4)" : "#1b1209",
       })),
       submitLabel: this.state.sent ? "Message envoyé — merci" : "Envoyer le message",
       formNote: this.state.sent
