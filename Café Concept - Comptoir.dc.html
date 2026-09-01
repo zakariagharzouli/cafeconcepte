@@ -404,7 +404,7 @@
 
 <!-- ══ LE FILM — un seul élément, du plein écran jusqu'à l'écran du MacBook ══ -->
 <div class="cc-stage" aria-hidden="true" style="position: fixed; left: 0; top: 0; z-index: 55; width: 100vw; height: 100vh; overflow: hidden; pointer-events: none; background: #0d0906; will-change: left, top, width, height">
-  <div class="cc-media" style="position: absolute; inset: 0; will-change: transform">
+  <div class="cc-media" style="position: absolute; inset: 0; will-change: transform; transform: translateZ(0); backface-visibility: hidden">
     <img src="analysis/vidframes/f_0.jpg" alt="" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 1">
     <img src="analysis/vidframes/f_1.5.jpg" alt="" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0">
     <img src="analysis/vidframes/f_3.jpg" alt="" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0">
@@ -693,7 +693,19 @@ class Component extends DCLogic {
         const f = vp * (frames.length - 1);
         const i = Math.floor(f);
         const mix = f - i;
-        for (let n = 0; n < frames.length; n++) frames[n].style.opacity = n === i ? "1" : n === i + 1 ? String(mix) : "0";
+        if (this._lastFrameIdx !== i || this._lastMix !== mix) {
+          if (this._lastFrameIdx !== undefined && this._lastFrameIdx !== i && this._lastFrameIdx !== i + 1 && frames[this._lastFrameIdx]) {
+            frames[this._lastFrameIdx].style.opacity = "0";
+          }
+          if (this._lastNextIdx !== undefined && this._lastNextIdx !== i && this._lastNextIdx !== i + 1 && frames[this._lastNextIdx]) {
+            frames[this._lastNextIdx].style.opacity = "0";
+          }
+          if (frames[i]) frames[i].style.opacity = "1";
+          if (frames[i + 1]) frames[i + 1].style.opacity = mix > 0.01 ? mix.toFixed(2) : "0";
+          this._lastFrameIdx = i;
+          this._lastNextIdx = i + 1;
+          this._lastMix = mix;
+        }
       }
 
       /* ---------- atterrissage : plein écran → écran du MacBook ---------- */
