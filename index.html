@@ -3,6 +3,19 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preload" as="script" href="public/vendor/react.production.min.js" />
+<link rel="preload" as="script" href="public/vendor/react-dom.production.min.js" />
+<script>
+  /* Le runtime resout ses dependances via window.__resources (cf. cdnScriptFor
+     dans support.js). On les sert depuis le domaine du site au lieu d'unpkg :
+     plus de DNS/TLS tiers sur le chemin critique, et surtout plus de page
+     blanche si le CDN est lent ou injoignable. Fichiers identiques a ceux
+     d'unpkg (hash SRI verifie). */
+  window.__resources = {
+    "https://unpkg.com/react@18.3.1/umd/react.production.min.js": "public/vendor/react.production.min.js",
+    "https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js": "public/vendor/react-dom.production.min.js"
+  };
+</script>
 <script src="./support.js"></script>
 </head>
 <body>
@@ -13,7 +26,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Instrument+Sans:wght@400;500&display=swap" rel="stylesheet" />
-<script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
+<script src="public/vendor/lenis.min.js"></script>
 <style>
   html, body { margin: 0; padding: 0; background: #241a11; }
   body { font-family: "Instrument Sans", system-ui, sans-serif; color: #2e2117; -webkit-font-smoothing: antialiased; overflow-x: clip; }
@@ -85,8 +98,8 @@
         <img src="analysis/vidframes/f_9.jpg" alt="" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0" />
         <img src="analysis/vidframes/f_9.9.jpg" alt="" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0" />
         <video class="cc-video" muted="" playsinline="" preload="auto" aria-hidden="true" poster="public/video/intro-poster.jpg" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity .7s ease">
+          <source src="public/video/intro-540.mp4" media="(max-width: 767px)" type="video/mp4" />
           <source src="public/video/intro.mp4" type="video/mp4" />
-          <source src="./public/video/intro.mp4" type="video/mp4" />
         </video>
       </div>
       <div style="position: absolute; inset: 0; background: radial-gradient(120% 90% at 50% 38%, rgba(36,26,17,0) 38%, rgba(36,26,17,.66) 100%)"></div>
@@ -723,6 +736,7 @@ class Component extends DCLogic {
     const sigBar = document.querySelector(".cc-sig-bar");
     const sigN = document.querySelector(".cc-sig-n");
     const sigImgs = Array.from(document.querySelectorAll(".cc-sig-img img"));
+    const sigK = new Array(sigImgs.length).fill(0);
     const marquees = Array.from(document.querySelectorAll(".cc-mq"));
     const seal = document.querySelector(".cc-seal");
     const word = document.querySelector(".cc-word");
@@ -769,15 +783,19 @@ class Component extends DCLogic {
       const rect = film.getBoundingClientRect();
       const total = film.offsetHeight - window.innerHeight;
       const target = clamp(-rect.top / (total || 1));
-      st.p = this.reduced ? target : smooth(st.p, target, 11);
+      st.p = this.reduced ? target : smooth(st.p, target, 15);
       const p = clamp(st.p);
       const vp = clamp(p / 0.93);
 
       if (useVideo && video.readyState >= 2) {
         const t = vp * (video.duration || 10);
-        if (!video.seeking && now - (this.lastSeek || 0) > 32 && Math.abs(video.currentTime - t) > 1 / 60) {
-          this.lastSeek = now;
-          try { if (video.fastSeek) video.fastSeek(t); else video.currentTime = t; } catch (e) {}
+        /* La video est encodee tout-intra (chaque frame est une keyframe) :
+           un seek exact est instantane, on peut donc en faire un par frame
+           rAF. Surtout PAS fastSeek() ici — il se cale sur la keyframe la
+           plus proche, ce qui saccade des que l'encodage a des GOP longs.
+           Seuil = demi-frame @24fps, comme sur main. */
+        if (Math.abs(video.currentTime - t) > 1 / 48) {
+          try { video.currentTime = t; } catch (e) {}
         }
       } else if (frames.length) {
         const f = vp * (frames.length - 1);
@@ -867,11 +885,16 @@ class Component extends DCLogic {
         if (sigBar) sigBar.style.transform = `scaleX(${tp})`;
         const sn = String(Math.min(5, Math.floor(tp * 5) + 1)).padStart(2, "0");
         if (sigN && sn !== lastSigN) { sigN.textContent = sn; lastSigN = sn; }
-        sigImgs.forEach((img) => {
-          const ir = img.getBoundingClientRect();
-          const kk = (ir.left + ir.width / 2 - window.innerWidth / 2) / window.innerWidth;
-          img.style.transform = `scale(1.14) translateX(${(-kk * 3).toFixed(2)}%)`;
-        });
+        /* toutes les lectures de rect AVANT la moindre ecriture : sinon
+           chaque iteration force un recalcul de layout (7 reflows/frame) */
+        const vw = window.innerWidth || 1;
+        for (let i = 0; i < sigImgs.length; i++) {
+          const ir = sigImgs[i].getBoundingClientRect();
+          sigK[i] = (ir.left + ir.width / 2 - vw / 2) / vw;
+        }
+        for (let i = 0; i < sigImgs.length; i++) {
+          sigImgs[i].style.transform = `scale(1.14) translateX(${(-sigK[i] * 3).toFixed(2)}%)`;
+        }
       }
 
       /* ---------- marquees : vitesse + direction liées au scroll ---------- */
@@ -894,21 +917,36 @@ class Component extends DCLogic {
         word.style.transform = `translateX(${(1 - kk) * -8}%) scale(${0.96 + kk * 0.04})`;
       }
 
-      /* rail actif */
+      /* rail actif — le DOM est resolu une fois (le template peut le
+         re-rendre : on reconstruit si les noeuds sont detaches), les
+         lectures sont groupees, et on n'ecrit que sur changement d'etat.
+         Avant : 3 querySelector + 1 reflow force PAR item et PAR frame. */
       if (rail) {
-        const items = Array.from(rail.querySelectorAll(".cc-rail-item"));
-        items.forEach((b) => {
-          const sec = document.querySelector(b.dataset.target);
-          if (!sec) return;
-          const sr = sec.getBoundingClientRect();
-          const on = sr.top <= window.innerHeight * 0.5 && sr.bottom >= window.innerHeight * 0.5;
-          const tickEl = b.querySelector(".cc-rail-tick");
-          const numEl = b.querySelector(".cc-rail-num");
-          const labEl = b.querySelector(".cc-rail-label");
-          if (tickEl) { tickEl.style.width = on ? "26px" : "13px"; tickEl.style.backgroundColor = on ? "#b4813f" : "rgba(46,33,23,.3)"; }
-          if (numEl) numEl.style.color = on ? "#241a11" : "rgba(46,33,23,.35)";
-          if (labEl) { labEl.style.opacity = on ? "1" : "0"; labEl.style.transform = on ? "translateX(0)" : "translateX(-5px)"; }
-        });
+        if (!this._rail || !this._rail.length || !this._rail[0].b.isConnected) {
+          this._rail = Array.from(rail.querySelectorAll(".cc-rail-item")).map((b) => ({
+            b,
+            sec: document.querySelector(b.dataset.target),
+            tickEl: b.querySelector(".cc-rail-tick"),
+            numEl: b.querySelector(".cc-rail-num"),
+            labEl: b.querySelector(".cc-rail-label"),
+            on: null,
+            next: null,
+          }));
+        }
+        const mid = (window.innerHeight || 1) * 0.5;
+        for (const it of this._rail) {
+          if (!it.sec) continue;
+          const sr = it.sec.getBoundingClientRect();
+          it.next = sr.top <= mid && sr.bottom >= mid;
+        }
+        for (const it of this._rail) {
+          if (!it.sec || it.next === it.on) continue;
+          it.on = it.next;
+          const on = it.on;
+          if (it.tickEl) { it.tickEl.style.width = on ? "26px" : "13px"; it.tickEl.style.backgroundColor = on ? "#b4813f" : "rgba(46,33,23,.3)"; }
+          if (it.numEl) it.numEl.style.color = on ? "#241a11" : "rgba(46,33,23,.35)";
+          if (it.labEl) { it.labEl.style.opacity = on ? "1" : "0"; it.labEl.style.transform = on ? "translateX(0)" : "translateX(-5px)"; }
+        }
       }
 
       if (this.sweep && now - (this.lastSweep || 0) > 120) { this.lastSweep = now; this.sweep(); }
