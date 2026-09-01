@@ -64,6 +64,64 @@
       scroll-behavior: auto !important;
     }
   }
+
+  /* ── Mobile ──────────────────────────────────────────────────────────
+     Les grilles a deux colonnes etaient figees en styles inline et ne se
+     repliaient jamais : sur un ecran de 390 px le corps de texte tombait a
+     192 px, et les descriptions de plats a 81 px, soit une dizaine de
+     caracteres par ligne. On les replie sur une colonne. */
+  @media (max-width: 860px) {
+    .split { grid-template-columns: 1fr !important; }
+  }
+
+  /* La barre de nav flottante mesurait 749 px de large sur un ecran de
+     390 : "Contact" et surtout "Appeler" — l'action principale — sortaient
+     de l'ecran et devenaient inatteignables. Sur mobile elle devient une
+     barre basse : les rubriques defilent horizontalement, et le bouton
+     d'appel reste ancre a droite, toujours visible. */
+  @media (max-width: 780px) {
+    .nav {
+      left: 12px !important;
+      right: 12px !important;
+      top: auto !important;
+      bottom: calc(12px + env(safe-area-inset-bottom, 0px)) !important;
+      width: auto !important;
+      max-width: none !important;
+      transform: none !important;
+      padding: 8px 8px 8px 12px !important;
+      gap: 8px !important;
+    }
+    .nav[style*="translate(-50%,-22px)"] { transform: translateY(22px) !important; }
+    .nav .nav-scroll {
+      flex: 1 1 auto;
+      min-width: 0;
+      overflow-x: auto;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+    }
+    .nav .nav-scroll::-webkit-scrollbar { display: none; }
+  }
+
+  /* Cibles tactiles. Les rubriques de nav faisaient 28 px de haut, le bouton
+     logo 32x28, et surtout le telephone et l'email de la section Contact et
+     du pied de page 15 a 18 px : les actions les plus utiles du site etaient
+     les plus difficiles a viser. Minimum 44 px partout. */
+  @media (max-width: 780px) {
+    .nav button,
+    .nav a,
+    #carte button {
+      min-height: 44px;
+    }
+    #contact a[href^="tel:"],
+    #contact a[href^="mailto:"],
+    #contact a[href*="google.com/maps"],
+    footer a[href^="tel:"],
+    footer a[href^="mailto:"] {
+      display: inline-flex;
+      align-items: center;
+      min-height: 44px;
+    }
+  }
 </style>
 </helmet>
 
@@ -76,7 +134,7 @@
   <button onClick="{{ goTop }}" aria-label="Café Concept — haut de page" style="display: flex; align-items: center; padding: 0 4px 0 0; border: 0; background: transparent; cursor: pointer">
     <img src="public/brand/badge.png" alt="" style="display: block; width: 28px; height: 28px; object-fit: contain" />
   </button>
-  <nav aria-label="Sections" style="display: flex; align-items: center; gap: clamp(6px, 1vw, 16px)">
+  <nav class="nav-scroll" aria-label="Sections" style="display: flex; align-items: center; gap: clamp(6px, 1vw, 16px)">
     <sc-for list="{{ nav }}" as="n" hint-placeholder-count="6">
       <button class="nav-link" data-target="{{ n.href }}" onClick="{{ n.go }}" style="padding: 8px 14px; border: 0; border-radius: 999px; background: transparent; cursor: pointer; font-size: 10.5px; font-weight: 500; letter-spacing: .18em; text-transform: uppercase; color: rgba(46,33,23,.55); white-space: nowrap; transition: background-color .3s ease, color .3s ease" style-hover="background: rgba(27,18,9,.07); color: #241a11">{{ n.label }}</button>
     </sc-for>
@@ -143,7 +201,7 @@
     <p style="margin: 0; font-size: 10px; font-weight: 500; letter-spacing: .3em; text-transform: uppercase; color: rgba(255,243,226,.32)">Depuis le premier café</p>
   </div>
 
-  <div style="position: relative; z-index: 2; display: grid; grid-template-columns: 1.2fr .8fr; gap: clamp(30px, 5vw, 84px); margin-top: clamp(30px, 5vh, 64px); align-items: center">
+  <div class="split" style="position: relative; z-index: 2; display: grid; grid-template-columns: 1.2fr .8fr; gap: clamp(30px, 5vw, 84px); margin-top: clamp(30px, 5vh, 64px); align-items: center">
     <div>
       <h2 class="sf" style="margin: 0; max-width: 30rem; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 400; font-size: clamp(1.7rem, 3.6vw, 3.5rem); line-height: 1.08; letter-spacing: -.035em; color: #fff3e2; text-wrap: pretty">Une cuisine ouverte, des produits choisis le matin, et zéro raccourci.</h2>
       <p class="rv" style="margin: 24px 0 0; max-width: 33rem; font-size: 16px; line-height: 1.8; color: rgba(255,243,226,.55); text-wrap: pretty">Bo buns, burgers smashés à la minute, salades composées, viennoiseries pur beurre sorties du four : la carte est large parce que la cuisine tourne toute la journée. Rien n'attend sous une lampe.</p>
@@ -264,7 +322,7 @@
     </sc-for>
   </div>
 
-  <div style="position: relative; z-index: 2; display: grid; grid-template-columns: 1fr 1fr; gap: 0 clamp(26px, 4vw, 70px); margin-top: clamp(24px, 4vh, 42px)">
+  <div class="split" style="position: relative; z-index: 2; display: grid; grid-template-columns: 1fr 1fr; gap: 0 clamp(26px, 4vw, 70px); margin-top: clamp(24px, 4vh, 42px)">
     <sc-for list="{{ items }}" as="item" hint-placeholder-count="8">
       <article style="display: grid; grid-template-columns: 52px 1fr auto; align-items: center; gap: 16px; padding: 13px 0; border-bottom: 1px solid rgba(27,18,9,.1)">
         <div style="width: 52px; height: 52px; overflow: hidden; border-radius: 58% 42% 46% 54% / 48% 52% 48% 52%; background: rgba(27,18,9,.06)">
@@ -302,7 +360,7 @@
 
   <h2 class="sf" style="position: relative; z-index: 2; margin: clamp(24px, 4.4vh, 54px) 0 0 clamp(0px, 6vw, 110px); max-width: 26rem; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(1.9rem, 5vw, 4.6rem); line-height: .98; letter-spacing: -.05em; color: #fff3e2">VOS ÉVÉNEMENTS, NOTRE MÉTIER.</h2>
 
-  <div style="position: relative; z-index: 2; display: grid; grid-template-columns: .9fr 1.1fr; gap: clamp(30px, 5vw, 80px); margin-top: clamp(30px, 5vh, 58px); align-items: center">
+  <div class="split" style="position: relative; z-index: 2; display: grid; grid-template-columns: .9fr 1.1fr; gap: clamp(30px, 5vw, 80px); margin-top: clamp(30px, 5vh, 58px); align-items: center">
     <figure class="rv" style="margin: 0">
       <div class="shot" style="position: relative; aspect-ratio: 1 / 1; overflow: hidden; background: #3c2a1c; border-radius: 44% 56% 62% 38% / 46% 42% 58% 54%; animation: blobB 23s ease-in-out infinite">
         <img src="public/food/traiteur-buffet.png" alt="Buffet traiteur du Café Concept" style="width: 100%; height: 100%; object-fit: cover" />
@@ -385,7 +443,7 @@
 
   <h2 class="sf" style="position: relative; z-index: 2; margin: clamp(22px, 4vh, 48px) 0 clamp(26px, 4.6vh, 52px); max-width: 26rem; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(1.9rem, 5vw, 4.6rem); line-height: .98; letter-spacing: -.05em; color: #1b1209">PASSEZ NOUS VOIR, ON VOUS ATTEND.</h2>
 
-  <div style="position: relative; z-index: 2; display: grid; grid-template-columns: 1fr 1fr; gap: clamp(28px, 4vw, 74px); align-items: start">
+  <div class="split" style="position: relative; z-index: 2; display: grid; grid-template-columns: 1fr 1fr; gap: clamp(28px, 4vw, 74px); align-items: start">
     <div class="rv">
       <ul style="list-style: none; margin: 0; padding: 0; display: grid; gap: 3px">
         <sc-for list="{{ hours }}" as="h" hint-placeholder-count="7">
@@ -397,7 +455,7 @@
           </li>
         </sc-for>
       </ul>
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 26px">
+      <div class="split" style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 26px">
         <div>
           <p style="margin: 0 0 9px; font-size: 9.5px; font-weight: 500; letter-spacing: .22em; text-transform: uppercase; color: rgba(46,33,23,.45)">Adresse</p>
           <p style="margin: 0; font-size: 15px; line-height: 1.7; color: #1b1209">502 Avenue des Meuniers<br />77550 Moissy-Cramayel</p>
@@ -418,7 +476,7 @@
         <span style="font-size: 9.5px; font-weight: 500; letter-spacing: .22em; text-transform: uppercase; color: rgba(46,33,23,.45)">Nom</span>
         <input type="text" name="nom" placeholder="Votre nom" style="width: 100%; padding: 13px 18px; border: 1px solid rgba(27,18,9,.14); border-radius: 999px; background: #fbeedd; font-size: 15px; color: #1b1209; outline: none; transition: border-color .3s ease" style-focus="border-color: #b4813f" />
       </label>
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px">
+      <div class="split" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px">
         <label style="display: grid; gap: 8px">
           <span style="font-size: 9.5px; font-weight: 500; letter-spacing: .22em; text-transform: uppercase; color: rgba(46,33,23,.45)">Email</span>
           <input type="email" name="email" placeholder="vous@email.fr" style="width: 100%; padding: 13px 18px; border: 1px solid rgba(27,18,9,.14); border-radius: 999px; background: #fbeedd; font-size: 15px; color: #1b1209; outline: none; transition: border-color .3s ease" style-focus="border-color: #b4813f" />
@@ -434,7 +492,7 @@
       </label>
       <fieldset class="devis" style="display: grid; gap: 20px; margin: 0; padding: 20px; border: 1px dashed rgba(27,18,9,.16); border-radius: 26px">
         <legend style="padding: 0 8px; font-size: 9.5px; font-weight: 500; letter-spacing: .22em; text-transform: uppercase; color: rgba(46,33,23,.45)">Devis traiteur — optionnel</legend>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px">
+        <div class="split" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px">
           <label style="display: grid; gap: 8px">
             <span style="font-size: 9.5px; font-weight: 500; letter-spacing: .22em; text-transform: uppercase; color: rgba(46,33,23,.45)">Type d&rsquo;événement</span>
             <select name="evenement" style="width: 100%; padding: 13px 18px; border: 1px solid rgba(27,18,9,.14); border-radius: 999px; background: #fbeedd; font-family: inherit; font-size: 14.5px; color: #1b1209; outline: none">
