@@ -1,0 +1,10 @@
+# Sources de travail, pas necessaires au site deploye
+uploads/
+analysis/**/*.mp4
+*.dc.html
+.thumbnail
+github.md
+
+# 45 Mo de frames JPEG plus utilises par index.html (animation remplacee
+# par analysis/vidframes/ + public/video/intro.mp4)
+public/frames/
