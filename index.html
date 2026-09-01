@@ -75,7 +75,7 @@
   <div style="position: sticky; top: 0; height: 100vh; overflow: hidden; background: #241a11">
 
     <div class="cc-frame" style="position: absolute; inset: 0; overflow: hidden; will-change: clip-path">
-      <div class="cc-media" style="position: absolute; inset: 0; will-change: transform">
+      <div class="cc-media" style="position: absolute; inset: 0; will-change: transform; transform: translateZ(0); backface-visibility: hidden">
         <img src="analysis/vidframes/f_0.jpg" alt="" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 1" />
         <img src="analysis/vidframes/f_1.5.jpg" alt="" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0" />
         <img src="analysis/vidframes/f_3.jpg" alt="" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0" />
@@ -86,6 +86,8 @@
         <img src="analysis/vidframes/f_9.9.jpg" alt="" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0" />
         <video class="cc-video" muted="" playsinline="" preload="auto" aria-hidden="true" poster="public/video/intro-poster.jpg" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity .7s ease">
           <source src="public/video/intro.mp4" type="video/mp4" />
+          <source src="/video/intro.mp4" type="video/mp4" />
+          <source src="./public/video/intro.mp4" type="video/mp4" />
         </video>
       </div>
       <div style="position: absolute; inset: 0; background: radial-gradient(120% 90% at 50% 38%, rgba(36,26,17,0) 38%, rgba(36,26,17,.66) 100%)"></div>
@@ -782,7 +784,19 @@ class Component extends DCLogic {
         const f = vp * (frames.length - 1);
         const i = Math.floor(f);
         const mix = f - i;
-        for (let n = 0; n < frames.length; n++) frames[n].style.opacity = n === i ? "1" : n === i + 1 ? String(mix) : "0";
+        if (this._lastFrameIdx !== i || this._lastMix !== mix) {
+          if (this._lastFrameIdx !== undefined && this._lastFrameIdx !== i && this._lastFrameIdx !== i + 1 && frames[this._lastFrameIdx]) {
+            frames[this._lastFrameIdx].style.opacity = "0";
+          }
+          if (this._lastNextIdx !== undefined && this._lastNextIdx !== i && this._lastNextIdx !== i + 1 && frames[this._lastNextIdx]) {
+            frames[this._lastNextIdx].style.opacity = "0";
+          }
+          if (frames[i]) frames[i].style.opacity = "1";
+          if (frames[i + 1]) frames[i + 1].style.opacity = mix > 0.01 ? mix.toFixed(2) : "0";
+          this._lastFrameIdx = i;
+          this._lastNextIdx = i + 1;
+          this._lastMix = mix;
+        }
       }
 
       const open = easeOut(clamp(p / 0.2));
@@ -1107,7 +1121,13 @@ class Component extends DCLogic {
       for (let i = 0; i < 9; i++) sparks.push({ x: e.clientX, y: e.clientY, a: (Math.PI * 2 * i) / 9, t0: t });
     };
     window.addEventListener("pointerdown", this.onClick, { passive: true });
+    let sparkRaf = null;
     const draw = () => {
+      if (!sparks.length) {
+        ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+        sparkRaf = null;
+        return;
+      }
       const now = performance.now();
       ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
       sparks = sparks.filter((s) => {
@@ -1124,9 +1144,17 @@ class Component extends DCLogic {
         ctx.stroke();
         return true;
       });
-      requestAnimationFrame(draw);
+      if (sparks.length > 0) {
+        sparkRaf = requestAnimationFrame(draw);
+      } else {
+        sparkRaf = null;
+      }
     };
-    requestAnimationFrame(draw);
+    const origOnClick = this.onClick;
+    this.onClick = (e) => {
+      if (origOnClick) origOnClick(e);
+      if (!sparkRaf) sparkRaf = requestAnimationFrame(draw);
+    };
   }
 
   /* ── glisser la galerie à la souris / au doigt ── */
